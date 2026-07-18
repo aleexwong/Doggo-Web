@@ -32,7 +32,7 @@
 }
 
 body {
-  background: radial-gradient(1200px 800px at 50% 20%, #1a1e27, var(--bg));
+  background: var(--bg);
   color: #e8e8e8;
   font-family: Roboto, 'Segoe UI', system-ui, sans-serif;
   min-height: 100vh;
@@ -74,7 +74,7 @@ body {
   right: -3px;
   width: 3px;
   border-radius: 2px;
-  background: linear-gradient(#4a4f5b, #23262d);
+  background: #33363e;
 }
 .phone::before { top: 22%; height: 8%; }
 .phone::after { top: 33%; height: 13%; }
@@ -136,9 +136,8 @@ body {
   align-items: center;
   gap: 8px;
   padding: 10px 14px;
-  background: linear-gradient(135deg, #4a7a42, var(--md-primary) 55%, #33582d);
+  background: var(--md-primary);
   color: var(--md-on-primary);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
   z-index: 1;
 }
 .appbar-title { font-size: 19px; font-weight: 500; letter-spacing: 0.2px; flex: 1; text-align: left; display: flex; align-items: center; }
@@ -151,7 +150,7 @@ body {
   font-weight: 600;
   letter-spacing: 0.5px;
 }
-.wordmark svg { filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.25)); transform: rotate(-8deg); }
+.wordmark svg { transform: rotate(-8deg); }
 .appbar-trailing { display: flex; align-items: center; }
 .appbar-icon {
   background: none;
@@ -182,21 +181,18 @@ body {
 }
 
 .boot {
-  background: radial-gradient(120% 90% at 50% 0%, #1d2b1a, #101418 65%);
+  background: #101418;
   color: #fff;
   cursor: pointer;
 }
 .boot-logo { font-size: 64px; animation: bounce 0.9s ease infinite alternate; }
-.boot-paw { color: #8fd07f; animation: bounce 0.9s ease infinite alternate; filter: drop-shadow(0 6px 16px rgba(143, 208, 127, 0.35)); }
+.boot-paw { color: #8fd07f; animation: bounce 0.9s ease infinite alternate; }
 .boot-name {
   font-family: Fredoka, Roboto, system-ui, sans-serif;
   font-size: 34px;
   font-weight: 600;
   letter-spacing: 2px;
-  background: linear-gradient(90deg, #b8e6aa, #7fbf6e);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: #a4d695;
 }
 .boot-sub { font-size: 11px; color: #7d8590; letter-spacing: 2px; }
 @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-12px); } }
@@ -213,7 +209,6 @@ body {
   align-items: center;
   justify-content: center;
   font-size: 44px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 .home h1 { font-family: Fredoka, Roboto, system-ui, sans-serif; font-size: 26px; font-weight: 600; color: var(--md-on-surface); }
 .mode-name { font-family: Fredoka, Roboto, system-ui, sans-serif; }
@@ -232,11 +227,10 @@ body {
   color: var(--md-on-surface);
   cursor: pointer;
   text-align: left;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
-  transition: transform 0.08s ease, box-shadow 0.15s ease, background 0.15s ease;
+  transition: transform 0.08s ease, background 0.15s ease;
   font: inherit;
 }
-.mode-card:hover { background: var(--md-surface-container-high); box-shadow: 0 3px 8px rgba(0, 0, 0, 0.16); }
+.mode-card:hover { background: var(--md-surface-container-high); }
 .mode-card:active { transform: scale(0.98); }
 .mode-icon {
   width: 46px;
@@ -277,8 +271,8 @@ button { font: inherit; cursor: pointer; }
   font-weight: 500;
   transition: transform 0.08s ease, box-shadow 0.15s ease, filter 0.15s ease;
 }
-.btn-filled { background: var(--md-primary); color: var(--md-on-primary); box-shadow: 0 1px 3px rgba(0,0,0,0.25); }
-.btn-filled:hover { filter: brightness(1.1); box-shadow: 0 3px 8px rgba(0,0,0,0.3); }
+.btn-filled { background: var(--md-primary); color: var(--md-on-primary); }
+.btn-filled:hover { filter: brightness(1.1); }
 .btn-tonal { background: var(--md-secondary-container); color: var(--md-on-surface); }
 .btn-tonal:hover { filter: brightness(0.97); }
 .btn-text { background: transparent; color: var(--md-primary); }
@@ -328,7 +322,7 @@ button { font: inherit; cursor: pointer; }
   background-size: 200% 100%;
   animation: shimmer 1.2s linear infinite;
 }
-.dog-card.elevated { box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18); position: relative; }
+.dog-card.elevated { box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15); position: relative; }
 
 /* Streak milestone celebration: paws burst out from the photo center */
 .paw-burst {
@@ -412,7 +406,6 @@ button { font: inherit; cursor: pointer; }
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 .final-score { font-size: 64px; font-weight: 700; color: var(--md-primary); line-height: 1; }
 .title-earned { font-weight: 500; }
