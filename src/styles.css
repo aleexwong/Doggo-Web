@@ -513,6 +513,17 @@ button { font: inherit; cursor: pointer; }
 .post-note.posted { color: var(--md-on-surface); font-weight: 500; }
 .btn-text.inline { padding: 0 2px; font-size: 13px; font-weight: 600; }
 
+/* Error-boundary fallback (rendered outside the phone frame) */
+.crash {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  color: #9aa0ab;
+  text-align: center;
+}
+.crash-title { font-size: 15px; }
+
 .sr-only {
   position: absolute;
   width: 1px; height: 1px;

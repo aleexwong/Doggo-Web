@@ -42,7 +42,12 @@ lives in the Firestore rules (public read, validated create-only on the
 npm install
 npm run dev      # local dev server
 npm run build    # typecheck + production build (dist/)
+npm run test:e2e # headless-browser suite with Dog.CEO and Firestore mocked
 ```
+
+CI (GitHub Actions) runs the build and the e2e suite on every push and PR.
+Locally, point the suite at a pre-installed browser with
+`CHROMIUM_PATH=/path/to/chromium npm run test:e2e`.
 
 ## Embed (Next.js site)
 
