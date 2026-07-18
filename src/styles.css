@@ -281,7 +281,7 @@ button { font: inherit; cursor: pointer; }
 
 /* ---------- Loading / error ---------- */
 
-.paw-spinner { font-size: 42px; animation: spin 1.2s linear infinite; }
+.paw-spinner { display: flex; color: var(--md-primary); animation: spin 1.2s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .error-title { font-weight: 500; font-size: 18px; }
 
@@ -309,6 +309,7 @@ button { font: inherit; cursor: pointer; }
   color: var(--md-on-surface);
 }
 .appbar .chip { background: rgba(255, 255, 255, 0.18); color: var(--md-on-primary); }
+.score-chip svg { color: var(--md-primary); }
 .timer-chip.urgent { background: var(--md-error); color: #fff; animation: pulse 0.6s ease infinite alternate; }
 @keyframes pulse { to { transform: scale(1.12); } }
 
@@ -425,7 +426,15 @@ button { font: inherit; cursor: pointer; }
 /* ---------- Leaderboard ---------- */
 
 .board { justify-content: flex-start; padding: 18px 16px; gap: 14px; }
-.board-title { font-family: Fredoka, Roboto, system-ui, sans-serif; font-size: 24px; font-weight: 600; }
+.board-title {
+  font-family: Fredoka, Roboto, system-ui, sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.board-title svg { color: var(--md-primary); }
 
 .segmented {
   display: flex;
@@ -464,7 +473,14 @@ button { font: inherit; cursor: pointer; }
   background-size: 200% 100%;
   animation: shimmer 1.2s linear infinite;
 }
-.board-rank { width: 28px; font-weight: 700; font-size: 15px; text-align: center; }
+.board-rank {
+  width: 28px;
+  font-weight: 700;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 .board-name {
   flex: 1;
   font-weight: 500;

@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { GameState } from '../game/state'
 import { AppBar } from './PhoneFrame'
-import { PawMark, Wordmark } from './Logo'
+import { FlameSketch, PawMark, Wordmark } from './Logo'
 
 export function GameScreen({
   state,
@@ -47,7 +47,11 @@ export function GameScreen({
       <div className="screen game">
         <div className="hud">
           <span className="chip score-chip">
-            {state.mode === 'streak' ? `🔥 Streak ${state.streak}` : `🐶 Score ${state.score}`}
+            {state.mode === 'streak' ? (
+              <><FlameSketch size={15} /> Streak {state.streak}</>
+            ) : (
+              <><PawMark size={14} /> Score {state.score}</>
+            )}
           </span>
           <span className="question">What breed is this?</span>
         </div>

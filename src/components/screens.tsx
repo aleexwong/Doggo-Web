@@ -9,7 +9,7 @@ import {
   NAME_MAX,
 } from '../game/leaderboard'
 import { AppBar } from './PhoneFrame'
-import { PawMark, Wordmark } from './Logo'
+import { DogSketch, PawMark, Wordmark } from './Logo'
 
 export function BootScreen({ onDone }: { onDone: () => void }) {
   useEffect(() => {
@@ -52,7 +52,7 @@ export function HomeScreen({
       />
       <div className="screen home">
         <div className="hero">
-          <div className="hero-avatar" aria-hidden="true">🐶</div>
+          <div className="hero-avatar" aria-hidden="true"><DogSketch size={48} /></div>
           <h1>Guess the breed!</h1>
           <p className="tagline">A photo appears — you have four choices.</p>
         </div>
@@ -87,7 +87,7 @@ export function LoadingScreen() {
     <div className="app-shell">
       <AppBar title={<Wordmark />} />
       <div className="screen loading" role="status" aria-label="Loading">
-        <div className="paw-spinner" aria-hidden="true">🐾</div>
+        <div className="paw-spinner" aria-hidden="true"><PawMark size={42} /></div>
         <p className="tagline">Fetching good dogs…</p>
       </div>
     </div>
@@ -113,23 +113,23 @@ function earnedTitle(mode: Mode, n: number): string {
   const ladder: [number, string][] =
     mode === 'streak'
       ? [
-          [50, 'Legendary Best Friend 🏆'],
-          [25, 'Dog Whisperer ✨'],
-          [15, 'Kennel Club Judge 🎖️'],
-          [10, 'Certified Dog Expert 🐾'],
-          [5, 'Good Human 🦴'],
-          [3, 'Dog Park Regular 🎾'],
-          [1, 'Puppy in Training 🐕'],
-          [0, 'Ruff Start 😅'],
+          [50, 'Legendary Best Friend'],
+          [25, 'Dog Whisperer'],
+          [15, 'Kennel Club Judge'],
+          [10, 'Certified Dog Expert'],
+          [5, 'Good Human'],
+          [3, 'Dog Park Regular'],
+          [1, 'Puppy in Training'],
+          [0, 'Ruff Start'],
         ]
       : [
-          [40, 'Speed of Zoomies 🏆'],
-          [30, 'Fastest Snoot in the West ✨'],
-          [20, 'Fetch Champion 🎖️'],
-          [12, 'Quick Sniffer 🐾'],
-          [6, 'Warming Up 🎾'],
-          [1, 'Slow and Steady 🐢'],
-          [0, 'Ruff Start 😅'],
+          [40, 'Speed of Zoomies'],
+          [30, 'Fastest Snoot in the West'],
+          [20, 'Fetch Champion'],
+          [12, 'Quick Sniffer'],
+          [6, 'Warming Up'],
+          [1, 'Slow and Steady'],
+          [0, 'Ruff Start'],
         ]
   return ladder.find(([min]) => n >= min)![1]
 }
@@ -171,7 +171,7 @@ export function GameOverScreen({
     const feat = isStreak
       ? `${result} dog breeds in a row`
       : `${result} dog breeds in ${BLITZ_SECONDS} seconds`
-    const text = `${earnedTitle(state.mode, result)} — I named ${feat} on Doggo 🐶 ${location.href}`
+    const text = `${earnedTitle(state.mode, result)} — I named ${feat} on Doggo. ${location.href}`
     try {
       if (navigator.share) {
         await navigator.share({ text })
@@ -225,7 +225,7 @@ export function GameOverScreen({
         {post === 'done' && (
           <p className="post-note posted">
             Posted!{' '}
-            <button className="btn-text inline" onClick={onBoard}>See Top Dogs 🏆</button>
+            <button className="btn-text inline" onClick={onBoard}>See Top Dogs</button>
           </p>
         )}
         <button className="btn-filled" onClick={onPlayAgain}>Play again</button>
