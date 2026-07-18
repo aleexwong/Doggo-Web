@@ -81,9 +81,13 @@ export function reducer(s: GameState, a: Action): GameState {
         streak: 0,
         timeLeft: BLITZ_SECONDS,
       }
+    // Round-building is async, so these can arrive after the player has
+    // quit or the game ended — only accept them in phases that expect them.
     case 'FIRST_ROUND':
+      if (s.phase !== 'loading') return s
       return { ...s, phase: 'playing', round: a.round }
     case 'NEXT_READY':
+      if (s.phase !== 'loading' && s.phase !== 'playing' && s.phase !== 'reveal') return s
       return { ...s, nextRound: a.round }
     case 'ANSWER': {
       if (s.phase !== 'playing' || !s.round) return s
@@ -95,7 +99,7 @@ export function reducer(s: GameState, a: Action): GameState {
         score: correct ? s.score + 1 : s.score,
         streak: correct ? s.streak + 1 : 0,
       }
-      next.bestStreak = Math.max(next.bestStreak, next.streak)
+      if (s.mode === 'streak') next.bestStreak = Math.max(next.bestStreak, next.streak)
       if (!correct && s.mode === 'streak') {
         next.phase = 'gameover'
       }
@@ -119,6 +123,7 @@ export function reducer(s: GameState, a: Action): GameState {
       return { ...s, timeLeft }
     }
     case 'FAIL':
+      if (s.phase !== 'loading') return s
       return { ...s, phase: 'error' }
     case 'HOME':
       return { ...initialState(), phase: 'home' }
