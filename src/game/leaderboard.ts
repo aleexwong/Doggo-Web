@@ -30,7 +30,11 @@ export function validName(name: string): boolean {
   return n.length >= NAME_MIN && n.length <= NAME_MAX
 }
 
+// Keep in sync with firestore.rules, which rejects scores outside [1, 10000].
+export const SCORE_MAX = 10000
+
 export async function submitScore(mode: Mode, name: string, score: number): Promise<void> {
+  const safeScore = Math.min(SCORE_MAX, Math.max(1, Math.round(score)))
   const res = await fetch(`${BASE}/${collection(mode)}?key=${API_KEY}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -38,7 +42,7 @@ export async function submitScore(mode: Mode, name: string, score: number): Prom
     body: JSON.stringify({
       fields: {
         name: { stringValue: name.trim().slice(0, NAME_MAX) },
-        score: { integerValue: String(score) },
+        score: { integerValue: String(safeScore) },
         createdAt: { timestampValue: new Date().toISOString() },
       },
     }),

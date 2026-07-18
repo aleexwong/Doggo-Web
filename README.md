@@ -13,27 +13,28 @@ on a personal site via iframe.
 Photos from the free [Dog.CEO API](https://dog.ceo/dog-api/). No auth — best
 scores live in `localStorage`.
 
-## Top Dogs leaderboard (optional)
+## Leaderboard setup (Firebase)
 
-Scores can be posted to a global leaderboard backed by the original Doggo
-app's Firebase project via the Firestore REST API. Copy `.env.example` to
-`.env.local` (or set the variables in your deploy environment) with the
-`project_id` and `api_key` from the [Doggo Android repo](https://github.com/aleexwong/Doggo)'s `app/google-services.json`. Unset, the
-leaderboard UI hides itself entirely.
+Scores can be posted to a global "Top Dogs" leaderboard via the Firestore
+REST API. It's optional — unset, the leaderboard UI hides itself entirely.
 
-Firestore rules need to allow public reads and creates on the
-`web_leaderboard_streak` and `web_leaderboard_blitz` collections, e.g.:
+1. Create a [Firebase project](https://console.firebase.google.com) (or reuse
+   the original [Doggo Android app](https://github.com/aleexwong/Doggo)'s).
+2. In the console, create a **Cloud Firestore** database in production mode.
+3. Grab the web app config values: the project ID and the Web API key
+   (Project settings → General), for `VITE_FB_PROJECT_ID` and
+   `VITE_FB_API_KEY`.
+4. Copy `.env.example` to `.env` (or `.env.local`) and fill in those two
+   variables — or set them in your deploy environment.
+5. Deploy the security rules in [`firestore.rules`](firestore.rules):
 
-```
-match /web_leaderboard_{mode}/{doc} {
-  allow read: if true;
-  allow create: if request.resource.data.name is string
-    && request.resource.data.name.size() <= 16
-    && request.resource.data.score is int
-    && request.resource.data.score >= 0
-    && request.resource.data.score < 10000;
-}
-```
+   ```sh
+   npx firebase-tools deploy --only firestore:rules --project <your-project-id>
+   ```
+
+The API key is a public client identifier, not a secret — abuse protection
+lives in the Firestore rules (public read, validated create-only on the
+`web_leaderboard_streak` and `web_leaderboard_blitz` collections).
 
 ## Develop
 
