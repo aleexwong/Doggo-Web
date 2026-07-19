@@ -166,7 +166,7 @@ export function GameOverScreen({
       : null
   const result = state.score
   const best = isStreak ? state.bestStreak : state.bestBlitz
-  const isNewBest = result > 0 && result >= best
+  const isNewBest = result > 0 && result > state.prevBest
   const share = async () => {
     const feat = isStreak
       ? `${result} dog breeds in a row`

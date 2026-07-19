@@ -23,6 +23,9 @@ export interface GameState {
   timeLeft: number
   bestStreak: number
   bestBlitz: number
+  /** The mode's best when this run started, so game over can tell a
+   *  genuinely new best apart from a tie with the old one. */
+  prevBest: number
 }
 
 export type Action =
@@ -61,6 +64,7 @@ export function initialState(): GameState {
     score: 0,
     streak: 0,
     timeLeft: BLITZ_SECONDS,
+    prevBest: 0,
     ...loadBests(),
   }
 }
@@ -80,6 +84,7 @@ export function reducer(s: GameState, a: Action): GameState {
         score: 0,
         streak: 0,
         timeLeft: BLITZ_SECONDS,
+        prevBest: a.mode === 'streak' ? s.bestStreak : s.bestBlitz,
       }
     // Round-building is async, so these can arrive after the player has
     // quit or the game ended — only accept them in phases that expect them.

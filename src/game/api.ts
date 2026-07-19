@@ -28,7 +28,7 @@ const FALLBACK_BREEDS: [string, string][] = [
   ['terrier/border', 'Border Terrier'],
   ['terrier/scottish', 'Scottish Terrier'],
   ['sheepdog/shetland', 'Shetland Sheepdog'],
-  ['germanshepherd', 'German Shepherd'],
+  ['pitbull', 'Pit Bull'],
   ['corgi/cardigan', 'Cardigan Corgi'],
   ['shiba', 'Shiba'],
   ['samoyed', 'Samoyed'],
@@ -40,9 +40,28 @@ const DENYLIST = new Set<string>(['mix'])
 
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
 
+// The API squishes multi-word names into one token ("cotondetulear",
+// "westhighland"); spell out the known ones so the answer grid reads right.
+const PRETTY: Record<string, string> = {
+  bullterrier: 'Bull Terrier',
+  cattledog: 'Cattle Dog',
+  cotondetulear: 'Coton de Tulear',
+  germanshepherd: 'German Shepherd',
+  mexicanhairless: 'Mexican Hairless',
+  pitbull: 'Pit Bull',
+  shihtzu: 'Shih Tzu',
+  stbernard: 'St Bernard',
+  waterdog: 'Water Dog',
+  flatcoated: 'Flat-coated',
+  germanlonghair: 'German Longhair',
+  kerryblue: 'Kerry Blue',
+  westhighland: 'West Highland',
+}
+const prettyWord = (w: string) => PRETTY[w] ?? w.split('-').map(cap).join(' ')
+
 function displayName(breed: string, sub?: string): string {
-  const b = cap(breed)
-  return sub ? `${cap(sub)} ${b}` : b
+  const b = prettyWord(breed)
+  return sub ? `${prettyWord(sub)} ${b}` : b
 }
 
 export async function fetchBreeds(): Promise<Breed[]> {
