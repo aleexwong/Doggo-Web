@@ -59,9 +59,16 @@ const PRETTY: Record<string, string> = {
 }
 const prettyWord = (w: string) => PRETTY[w] ?? w.split('-').map(cap).join(' ')
 
+// Sub-breeds usually read sub-first ("retriever/golden" -> Golden Retriever),
+// but for these the breed token is the adjective: "german/shepherd" is a
+// German Shepherd, not a Shepherd German.
+const BREED_FIRST = new Set(['african', 'australian', 'danish', 'finnish', 'german', 'rough'])
+
 function displayName(breed: string, sub?: string): string {
-  const b = prettyWord(breed)
-  return sub ? `${prettyWord(sub)} ${b}` : b
+  if (!sub) return prettyWord(breed)
+  return BREED_FIRST.has(breed)
+    ? `${prettyWord(breed)} ${prettyWord(sub)}`
+    : `${prettyWord(sub)} ${prettyWord(breed)}`
 }
 
 export async function fetchBreeds(): Promise<Breed[]> {
