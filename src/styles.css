@@ -324,6 +324,9 @@ button { font: inherit; cursor: pointer; }
   animation: shimmer 1.2s linear infinite;
 }
 .dog-card.elevated { box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15); position: relative; }
+/* Once the photo loads, stop the loading shimmer and give letterboxed
+   images (object-fit: contain) a clean solid backdrop instead. */
+.dog-card.loaded { background: var(--md-surface-container-high); animation: none; }
 
 /* Streak milestone celebration: paws burst out from the photo center */
 .paw-burst {
@@ -368,7 +371,9 @@ button { font: inherit; cursor: pointer; }
   100% { transform: scale(1); opacity: 0; }
 }
 @keyframes shimmer { to { background-position: -200% 0; } }
-.dog-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* contain (not cover) so the whole dog is always in frame — no cropped
+   heads or tails, which matters when the dog is the thing to identify. */
+.dog-card img { width: 100%; height: 100%; object-fit: contain; display: block; }
 
 .answers {
   width: 100%;

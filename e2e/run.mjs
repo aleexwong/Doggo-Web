@@ -125,6 +125,42 @@ console.log('suite: blitz')
   await page.close()
 }
 
+// ---- Suite 2b: a broken visible image self-heals ----
+console.log('suite: broken-image recovery')
+{
+  const page = await browser.newPage()
+  let n = 0
+  const hits = new Map()
+  await page.route('https://dog.ceo/api/breeds/list/all', (r) =>
+    r.fulfill({ json: { message: { pug: [], husky: [], beagle: [], boxer: [] }, status: 'success' } }))
+  await page.route(/https:\/\/dog\.ceo\/api\/breed\/(\w+)\/images\/random/, (r) => {
+    const breed = r.request().url().match(/breed\/(\w+)\//)[1]
+    r.fulfill({ json: { message: `https://images.dog.ceo/${breed}/img-${++n}.jpg`, status: 'success' } })
+  })
+  // Fail the SECOND request to any given URL: the preload (1st hit) succeeds so
+  // the round is shown, but the visible <img> (2nd hit) 404s — exactly the
+  // "preloaded fine, rendered broken" case the onError fallback handles.
+  await page.route(/https:\/\/images\.dog\.ceo\/.*/, (r) => {
+    const url = r.request().url()
+    const c = (hits.get(url) || 0) + 1
+    hits.set(url, c)
+    if (c === 2) return r.fulfill({ status: 404, body: 'nope' })
+    return r.fulfill({ contentType: 'image/jpeg', body: JPEG })
+  })
+  await page.goto(`http://localhost:${PORT}/`)
+  await page.waitForSelector('.mode-card', { timeout: 8000 })
+  await page.click('.mode-card:has-text("Endless Streak")')
+  await page.waitForSelector('.dog-card img', { timeout: 8000 })
+  await page
+    .waitForFunction(() => {
+      const img = document.querySelector('.dog-card img')
+      return img && img.complete && img.naturalWidth > 0
+    }, { timeout: 8000 })
+    .then(() => ok('broken visible image self-heals'))
+    .catch(() => fail('dog image stayed blank after render error'))
+  await page.close()
+}
+
 // ---- Suite 3: leaderboard against mocked Firestore ----
 console.log('suite: leaderboard')
 {
