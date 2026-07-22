@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { GameState, Mode, BLITZ_SECONDS } from '../game/state'
 import {
   leaderboardEnabled,
@@ -148,6 +148,9 @@ export function GameOverScreen({
   const [copied, setCopied] = useState(false)
   const [nick, setNick] = useState(loadNickname)
   const [post, setPost] = useState<'idle' | 'saving' | 'done' | 'error'>('idle')
+  // Move focus to the primary action when the game ends, so keyboard players
+  // can restart with Enter without hunting for the button.
+  const playAgainRef = useRef<HTMLButtonElement>(null)
   const postScore = async () => {
     if (!validName(nick) || post === 'saving') return
     setPost('saving')
@@ -167,6 +170,14 @@ export function GameOverScreen({
   const result = state.score
   const best = isStreak ? state.bestStreak : state.bestBlitz
   const isNewBest = result > 0 && result > state.prevBest
+  // Focus the primary action on game over so keyboard players can restart with
+  // Enter — but not when the name field is showing, so it stays typeable.
+  const showNameInput = leaderboardEnabled && result > 0 && post === 'idle'
+  useEffect(() => {
+    if (!showNameInput) playAgainRef.current?.focus()
+    // Focus once on mount for this game-over screen.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   const share = async () => {
     const feat = isStreak
       ? `${result} dog breeds in a row`
@@ -228,7 +239,7 @@ export function GameOverScreen({
             <button className="btn-text inline" onClick={onBoard}>See Top Dogs</button>
           </p>
         )}
-        <button className="btn-filled" onClick={onPlayAgain}>Play again</button>
+        <button ref={playAgainRef} className="btn-filled" onClick={onPlayAgain}>Play again</button>
         <div className="row">
           <button className="btn-tonal" onClick={share}>{copied ? 'Copied!' : 'Share score'}</button>
           {leaderboardEnabled && (

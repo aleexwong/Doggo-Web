@@ -60,7 +60,9 @@ export default function App() {
   // Blitz countdown.
   useEffect(() => {
     if (state.mode !== 'blitz' || (state.phase !== 'playing' && state.phase !== 'reveal')) return
-    const id = setInterval(() => dispatch({ type: 'TICK' }), 1000)
+    // Poll faster than 1s: TICK derives the remaining time from the deadline,
+    // so a sub-second interval just keeps the displayed countdown accurate.
+    const id = setInterval(() => dispatch({ type: 'TICK' }), 250)
     return () => clearInterval(id)
   }, [state.mode, state.phase])
 

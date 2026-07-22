@@ -1,7 +1,20 @@
 const API = 'https://dog.ceo/api'
 const FETCH_TIMEOUT_MS = 8000
 
-const get = (url: string) => fetch(url, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) })
+/**
+ * A timeout AbortSignal that works on older browsers too. AbortSignal.timeout
+ * is unsupported before Safari 16 / older Chrome & Firefox — without this
+ * fallback every fetch would throw there and no round could ever load.
+ */
+export function timeoutSignal(ms: number): AbortSignal {
+  const S = AbortSignal as typeof AbortSignal & { timeout?: (ms: number) => AbortSignal }
+  if (typeof S.timeout === 'function') return S.timeout(ms)
+  const c = new AbortController()
+  setTimeout(() => c.abort(), ms)
+  return c.signal
+}
+
+const get = (url: string) => fetch(url, { signal: timeoutSignal(FETCH_TIMEOUT_MS) })
 
 export interface Breed {
   /** API path, e.g. "hound/afghan" or "pug" */

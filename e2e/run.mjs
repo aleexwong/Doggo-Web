@@ -46,9 +46,11 @@ for (let i = 0; ; i++) {
 
 const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined })
 
-/** New page with dog.ceo mocked; imageDelay slows round-building. */
-async function newGamePage({ imageDelay = 0 } = {}) {
+/** New page with dog.ceo mocked; imageDelay slows round-building.
+ *  `init` runs in the page before any app code (e.g. to break localStorage). */
+async function newGamePage({ imageDelay = 0, init } = {}) {
   const page = await browser.newPage()
+  if (init) await page.addInitScript(init)
   await page.route('https://dog.ceo/api/breeds/list/all', (r) =>
     r.fulfill({ json: { message: { pug: [], husky: [], beagle: [], boxer: [] }, status: 'success' } }))
   await page.route(/https:\/\/dog\.ceo\/api\/breed\/(\w+)\/images\/random/, async (r) => {
@@ -158,6 +160,33 @@ console.log('suite: broken-image recovery')
     }, { timeout: 8000 })
     .then(() => ok('broken visible image self-heals'))
     .catch(() => fail('dog image stayed blank after render error'))
+  await page.close()
+}
+
+// ---- Suite 2c: storage-disabled (Safari private mode) doesn't crash ----
+console.log('suite: storage resilience')
+{
+  const page = await newGamePage({
+    init: () => {
+      // Mimic a browser where localStorage access throws on write.
+      const boom = () => {
+        throw new Error('storage blocked')
+      }
+      Object.defineProperty(window, 'localStorage', {
+        configurable: true,
+        get: () => ({ getItem: () => null, setItem: boom, removeItem: boom }),
+      })
+    },
+  })
+  await page.click('.mode-card:has-text("Endless Streak")')
+  await page.waitForSelector('.answer', { timeout: 8000 })
+  await clickAnswer(page, true) // saveBests would throw here without the guard
+  await sleep(REVEAL_WAIT)
+  const crashed = await page.$('.crash')
+  const stillPlayable = await page.$('.answer')
+  !crashed && stillPlayable
+    ? ok('survives a throwing localStorage')
+    : fail(crashed ? 'crashed on blocked storage' : 'game did not continue')
   await page.close()
 }
 

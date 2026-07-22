@@ -390,6 +390,10 @@ button { font: inherit; cursor: pointer; }
   color: var(--md-on-surface);
   border: 1.5px solid var(--md-outline);
   transition: transform 0.08s ease, background 0.15s ease, border-color 0.15s ease;
+  /* Long two-word breed names shouldn't overflow the narrow grid cell. */
+  overflow-wrap: anywhere;
+  hyphens: auto;
+  line-height: 1.2;
 }
 .answer:hover:not(:disabled) { background: var(--md-surface-container-high); border-color: var(--md-primary); }
 .answer.correct { background: var(--md-primary-container); border-color: var(--md-primary); color: var(--md-on-primary-container); }
