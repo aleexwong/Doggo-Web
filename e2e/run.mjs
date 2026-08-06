@@ -237,6 +237,45 @@ console.log('suite: leaderboard')
   await page.close()
 }
 
+// ---- Suite 4: profanity filter + guest posting ----
+console.log('suite: guest + profanity')
+{
+  const page = await newGamePage()
+  const store = { web_leaderboard_streak: [], web_leaderboard_blitz: [] }
+  await page.route(/https:\/\/firestore\.googleapis\.com\/.*/, async (route) => {
+    const url = route.request().url()
+    const body = route.request().postDataJSON()
+    if (url.includes(':runQuery')) return route.fulfill({ json: [{ readTime: 'now' }] })
+    const m = url.match(/documents\/(web_leaderboard_\w+)\?/)
+    if (m) {
+      store[m[1]].push(body.fields)
+      return route.fulfill({ json: { name: m[1] + '/d1' } })
+    }
+    return route.fulfill({ status: 404, json: {} })
+  })
+  await page.click('.mode-card:has-text("Endless Streak")')
+  await page.waitForSelector('.answer', { timeout: 8000 })
+  await clickAnswer(page, true); await sleep(REVEAL_WAIT)
+  await clickAnswer(page, false)
+  await page.waitForSelector('.gameover', { timeout: 4000 })
+
+  // A profane name is rejected: Post disabled + hint shown, and a leet variant
+  // is caught too.
+  await page.fill('.nick-input', 'sh1tlord')
+  const postBtn = page.locator('.post-row .btn-tonal')
+  const blocked = await postBtn.isDisabled()
+  const hint = await page.$('.post-hint')
+  blocked && hint ? ok('profane name blocked (leet caught)') : fail('profane name was postable')
+
+  // Guest posting works and lands a Guest-#### handle even from a bad name.
+  await page.click('.guest-link')
+  await page.waitForSelector('.post-note.posted', { timeout: 4000 })
+  const guest = store.web_leaderboard_streak[0]?.name?.stringValue
+  const isGuestHandle = /^Guest-\d{4}$/.test(guest || '')
+  isGuestHandle ? ok(`guest posted as ${guest}`) : fail('guest name: ' + guest)
+  await page.close()
+}
+
 await browser.close()
 server.kill()
 if (failures) {

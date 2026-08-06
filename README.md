@@ -36,6 +36,12 @@ The API key is a public client identifier, not a secret — abuse protection
 lives in the Firestore rules (public read, validated create-only on the
 `web_leaderboard_streak` and `web_leaderboard_blitz` collections).
 
+Players can post under a chosen name or one-tap **post as guest** (a stable
+`Guest-####` handle). Names run through a client-side profanity filter
+(`src/game/profanity.ts`) before posting; note this is a UX gate only — a
+determined user can bypass any client check, so real enforcement still needs
+a server-side validator (a Cloud Function or Firebase App Check).
+
 ## Develop
 
 ```sh

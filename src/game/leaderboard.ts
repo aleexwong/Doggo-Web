@@ -1,5 +1,6 @@
 import { Mode } from './state'
 import { timeoutSignal } from './api'
+import { isClean } from './profanity'
 
 // Firebase web client config, injected at build time (see .env.example).
 // The values are public client identifiers — access control lives in
@@ -26,9 +27,36 @@ export interface Entry {
 export const NAME_MIN = 2
 export const NAME_MAX = 16
 
-export function validName(name: string): boolean {
+/** Why a name can't be posted, as a short user-facing reason — or null if OK. */
+export function nameIssue(name: string): string | null {
   const n = name.trim()
-  return n.length >= NAME_MIN && n.length <= NAME_MAX
+  if (n.length < NAME_MIN) return `At least ${NAME_MIN} characters`
+  if (n.length > NAME_MAX) return `At most ${NAME_MAX} characters`
+  if (!isClean(n)) return 'Please pick a friendlier name'
+  return null
+}
+
+export function validName(name: string): boolean {
+  return nameIssue(name) === null
+}
+
+// Stable per-device guest handle, so a player who doesn't want to pick a name
+// can still appear on the board (and keep the same identity across posts).
+const GUEST_KEY = 'doggo.guestName'
+export function guestName(): string {
+  try {
+    const existing = localStorage.getItem(GUEST_KEY)
+    if (existing) return existing
+  } catch {
+    /* storage unavailable — fall through to a fresh, unpersisted handle */
+  }
+  const name = `Guest-${Math.floor(1000 + Math.random() * 9000)}`
+  try {
+    localStorage.setItem(GUEST_KEY, name)
+  } catch {
+    /* not persisted, but still usable for this post */
+  }
+  return name
 }
 
 // Keep in sync with firestore.rules, which rejects scores outside [1, 10000].

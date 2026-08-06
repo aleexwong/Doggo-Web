@@ -6,6 +6,8 @@ import {
   saveNickname,
   submitScore,
   validName,
+  nameIssue,
+  guestName,
   NAME_MAX,
 } from '../game/leaderboard'
 import { AppBar } from './PhoneFrame'
@@ -151,17 +153,21 @@ export function GameOverScreen({
   // Move focus to the primary action when the game ends, so keyboard players
   // can restart with Enter without hunting for the button.
   const playAgainRef = useRef<HTMLButtonElement>(null)
-  const postScore = async () => {
-    if (!validName(nick) || post === 'saving') return
+  const postScore = async (overrideName?: string) => {
+    const name = overrideName ?? nick
+    if (!validName(name) || post === 'saving') return
     setPost('saving')
     try {
-      saveNickname(nick)
-      await submitScore(state.mode, nick, state.score)
+      if (!overrideName) saveNickname(name)
+      await submitScore(state.mode, name, state.score)
       setPost('done')
     } catch {
       setPost('error')
     }
   }
+  // One-tap guest posting for players who don't want to pick a name.
+  const postAsGuest = () => postScore(guestName())
+  const issue = nameIssue(nick)
   const isStreak = state.mode === 'streak'
   const missedBreed =
     state.round && state.picked && state.picked !== state.round.answer.path
@@ -211,22 +217,28 @@ export function GameOverScreen({
           )}
         </div>
         {leaderboardEnabled && result > 0 && post !== 'done' && (
-          <div className="post-row">
-            <input
-              className="nick-input"
-              placeholder="Your name"
-              value={nick}
-              maxLength={NAME_MAX}
-              onChange={(e) => setNick(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && postScore()}
-              aria-label="Name for the leaderboard"
-            />
-            <button
-              className="btn-tonal"
-              disabled={!validName(nick) || post === 'saving'}
-              onClick={postScore}
-            >
-              {post === 'saving' ? 'Posting…' : 'Post score'}
+          <div className="post-block">
+            <div className="post-row">
+              <input
+                className="nick-input"
+                placeholder="Your name"
+                value={nick}
+                maxLength={NAME_MAX}
+                onChange={(e) => setNick(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && postScore()}
+                aria-label="Name for the leaderboard"
+              />
+              <button
+                className="btn-tonal"
+                disabled={!validName(nick) || post === 'saving'}
+                onClick={() => postScore()}
+              >
+                {post === 'saving' ? 'Posting…' : 'Post score'}
+              </button>
+            </div>
+            {issue && nick.trim().length > 0 && <p className="post-hint">{issue}</p>}
+            <button className="btn-text guest-link" onClick={postAsGuest} disabled={post === 'saving'}>
+              or post as guest
             </button>
           </div>
         )}
