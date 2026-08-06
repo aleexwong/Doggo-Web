@@ -36,11 +36,32 @@ The API key is a public client identifier, not a secret — abuse protection
 lives in the Firestore rules (public read, validated create-only on the
 `web_leaderboard_streak` and `web_leaderboard_blitz` collections).
 
-Players can post under a chosen name or one-tap **post as guest** (a stable
-`Guest-####` handle). Names run through a client-side profanity filter
-(`src/game/profanity.ts`) before posting; note this is a UX gate only — a
-determined user can bypass any client check, so real enforcement still needs
-a server-side validator (a Cloud Function or Firebase App Check).
+Players can post under a chosen name (2–20 chars) or one-tap **post as guest**
+(a stable `Guest-####` handle). Names run through a client-side profanity
+filter (`src/game/profanity.ts`) before posting; note this is a UX gate only —
+a determined user can bypass any client check.
+
+### Server-side enforcement (recommended)
+
+`functions/` holds a Cloud Function (`submitScore`) that re-validates every
+post — mode, score bounds, name length, the same profanity list, and a
+best-effort per-IP rate limit — and writes with the Admin SDK. To make it the
+enforced write path:
+
+1. Deploy it (needs the Blaze plan for outbound functions):
+
+   ```sh
+   cd functions && npm install
+   npx firebase-tools deploy --only functions --project <your-project-id>
+   ```
+2. Set `VITE_LEADERBOARD_WRITE_URL` to the deployed function's URL and redeploy
+   the site, so posts flow through the function.
+3. In [`firestore.rules`](firestore.rules), change each `allow create` to
+   `if false` and redeploy rules. Admin-SDK writes bypass rules, so direct
+   client writes (which skip the checks) are now blocked.
+
+Alternatively, [Firebase App Check](https://firebase.google.com/docs/app-check)
+blocks requests that don't originate from your app with no code changes.
 
 ## Develop
 

@@ -9,6 +9,10 @@ import { isClean } from './profanity'
 // offline-first with localStorage bests.
 const PROJECT_ID = import.meta.env.VITE_FB_PROJECT_ID as string | undefined
 const API_KEY = import.meta.env.VITE_FB_API_KEY as string | undefined
+// Optional: when set to the deployed Cloud Function URL, score posts go
+// through the server-side validator (real enforcement) instead of writing to
+// Firestore directly. Reads always stay direct.
+const WRITE_URL = import.meta.env.VITE_LEADERBOARD_WRITE_URL as string | undefined
 
 export const leaderboardEnabled = Boolean(PROJECT_ID && API_KEY)
 
@@ -25,7 +29,7 @@ export interface Entry {
 }
 
 export const NAME_MIN = 2
-export const NAME_MAX = 16
+export const NAME_MAX = 20
 
 /** Why a name can't be posted, as a short user-facing reason — or null if OK. */
 export function nameIssue(name: string): string | null {
@@ -73,13 +77,28 @@ export function sanitizeName(name: string): string {
 
 export async function submitScore(mode: Mode, name: string, score: number): Promise<void> {
   const safeScore = Math.min(SCORE_MAX, Math.max(1, Math.round(score)))
+  const cleanName = sanitizeName(name)
+
+  // Preferred path: hand off to the Cloud Function, which re-validates and is
+  // the only writer once Firestore create rules are locked down.
+  if (WRITE_URL) {
+    const res = await fetch(WRITE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      signal: timeoutSignal(TIMEOUT_MS),
+      body: JSON.stringify({ mode, name: cleanName, score: safeScore }),
+    })
+    if (!res.ok) throw new Error(`submit failed: HTTP ${res.status}`)
+    return
+  }
+
   const res = await fetch(`${BASE}/${collection(mode)}?key=${API_KEY}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     signal: timeoutSignal(TIMEOUT_MS),
     body: JSON.stringify({
       fields: {
-        name: { stringValue: sanitizeName(name) },
+        name: { stringValue: cleanName },
         score: { integerValue: String(safeScore) },
         createdAt: { timestampValue: new Date().toISOString() },
       },
