@@ -29,7 +29,7 @@ export interface Entry {
 }
 
 export const NAME_MIN = 2
-export const NAME_MAX = 20
+export const NAME_MAX = 12
 
 /** Why a name can't be posted, as a short user-facing reason — or null if OK. */
 export function nameIssue(name: string): string | null {

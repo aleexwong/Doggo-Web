@@ -15,7 +15,7 @@ const db = getFirestore()
 
 const MODES = new Set(['streak', 'blitz'])
 const NAME_MIN = 2
-const NAME_MAX = 20
+const NAME_MAX = 12
 const SCORE_MIN = 1
 const SCORE_MAX = 10000
 const RATE_WINDOW_MS = 5000 // at most one post per IP per this window

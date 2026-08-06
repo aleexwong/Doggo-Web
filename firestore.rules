@@ -18,7 +18,7 @@ service cloud.firestore {
         && d.keys().hasAll(['name', 'score', 'createdAt'])
         && d.name is string
         && d.name.size() >= 2
-        && d.name.size() <= 20
+        && d.name.size() <= 12
         && d.score is int
         && d.score >= 1
         && d.score <= 10000
