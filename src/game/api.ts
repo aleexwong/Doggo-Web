@@ -1,7 +1,20 @@
 const API = 'https://dog.ceo/api'
 const FETCH_TIMEOUT_MS = 8000
 
-const get = (url: string) => fetch(url, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) })
+/**
+ * A timeout AbortSignal that works on older browsers too. AbortSignal.timeout
+ * is unsupported before Safari 16 / older Chrome & Firefox — without this
+ * fallback every fetch would throw there and no round could ever load.
+ */
+export function timeoutSignal(ms: number): AbortSignal {
+  const S = AbortSignal as typeof AbortSignal & { timeout?: (ms: number) => AbortSignal }
+  if (typeof S.timeout === 'function') return S.timeout(ms)
+  const c = new AbortController()
+  setTimeout(() => c.abort(), ms)
+  return c.signal
+}
+
+const get = (url: string) => fetch(url, { signal: timeoutSignal(FETCH_TIMEOUT_MS) })
 
 export interface Breed {
   /** API path, e.g. "hound/afghan" or "pug" */
@@ -28,7 +41,7 @@ const FALLBACK_BREEDS: [string, string][] = [
   ['terrier/border', 'Border Terrier'],
   ['terrier/scottish', 'Scottish Terrier'],
   ['sheepdog/shetland', 'Shetland Sheepdog'],
-  ['germanshepherd', 'German Shepherd'],
+  ['pitbull', 'Pit Bull'],
   ['corgi/cardigan', 'Cardigan Corgi'],
   ['shiba', 'Shiba'],
   ['samoyed', 'Samoyed'],
@@ -40,9 +53,35 @@ const DENYLIST = new Set<string>(['mix'])
 
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
 
+// The API squishes multi-word names into one token ("cotondetulear",
+// "westhighland"); spell out the known ones so the answer grid reads right.
+const PRETTY: Record<string, string> = {
+  bullterrier: 'Bull Terrier',
+  cattledog: 'Cattle Dog',
+  cotondetulear: 'Coton de Tulear',
+  germanshepherd: 'German Shepherd',
+  mexicanhairless: 'Mexican Hairless',
+  pitbull: 'Pit Bull',
+  shihtzu: 'Shih Tzu',
+  stbernard: 'St Bernard',
+  waterdog: 'Water Dog',
+  flatcoated: 'Flat-coated',
+  germanlonghair: 'German Longhair',
+  kerryblue: 'Kerry Blue',
+  westhighland: 'West Highland',
+}
+const prettyWord = (w: string) => PRETTY[w] ?? w.split('-').map(cap).join(' ')
+
+// Sub-breeds usually read sub-first ("retriever/golden" -> Golden Retriever),
+// but for these the breed token is the adjective: "german/shepherd" is a
+// German Shepherd, not a Shepherd German.
+const BREED_FIRST = new Set(['african', 'australian', 'danish', 'finnish', 'german', 'rough'])
+
 function displayName(breed: string, sub?: string): string {
-  const b = cap(breed)
-  return sub ? `${cap(sub)} ${b}` : b
+  if (!sub) return prettyWord(breed)
+  return BREED_FIRST.has(breed)
+    ? `${prettyWord(breed)} ${prettyWord(sub)}`
+    : `${prettyWord(sub)} ${prettyWord(breed)}`
 }
 
 export async function fetchBreeds(): Promise<Breed[]> {

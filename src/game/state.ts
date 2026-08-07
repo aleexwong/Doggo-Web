@@ -23,6 +23,13 @@ export interface GameState {
   timeLeft: number
   bestStreak: number
   bestBlitz: number
+  /** The mode's best when this run started, so game over can tell a
+   *  genuinely new best apart from a tie with the old one. */
+  prevBest: number
+  /** Wall-clock epoch (ms) when the blitz run ends; null outside blitz.
+   *  Deriving timeLeft from this keeps the clock accurate across tab
+   *  throttling and reveal pauses instead of drifting per tick. */
+  deadline: number | null
 }
 
 export type Action =
@@ -39,16 +46,34 @@ export type Action =
 const BEST_STREAK_KEY = 'doggo.bestStreak'
 const BEST_BLITZ_KEY = 'doggo.bestBlitz'
 
+// localStorage can throw (Safari private mode, storage disabled/full), so
+// every access is guarded — a blocked store just means bests don't persist,
+// rather than crashing the game on the first answer.
+function readNum(key: string): number {
+  try {
+    return Number(localStorage.getItem(key)) || 0
+  } catch {
+    return 0
+  }
+}
+function writeStr(key: string, value: string) {
+  try {
+    localStorage.setItem(key, value)
+  } catch {
+    /* storage unavailable — skip persistence */
+  }
+}
+
 export function loadBests() {
   return {
-    bestStreak: Number(localStorage.getItem(BEST_STREAK_KEY)) || 0,
-    bestBlitz: Number(localStorage.getItem(BEST_BLITZ_KEY)) || 0,
+    bestStreak: readNum(BEST_STREAK_KEY),
+    bestBlitz: readNum(BEST_BLITZ_KEY),
   }
 }
 
 function saveBests(s: GameState) {
-  localStorage.setItem(BEST_STREAK_KEY, String(s.bestStreak))
-  localStorage.setItem(BEST_BLITZ_KEY, String(s.bestBlitz))
+  writeStr(BEST_STREAK_KEY, String(s.bestStreak))
+  writeStr(BEST_BLITZ_KEY, String(s.bestBlitz))
 }
 
 export function initialState(): GameState {
@@ -61,6 +86,8 @@ export function initialState(): GameState {
     score: 0,
     streak: 0,
     timeLeft: BLITZ_SECONDS,
+    prevBest: 0,
+    deadline: null,
     ...loadBests(),
   }
 }
@@ -80,10 +107,23 @@ export function reducer(s: GameState, a: Action): GameState {
         score: 0,
         streak: 0,
         timeLeft: BLITZ_SECONDS,
+        prevBest: a.mode === 'streak' ? s.bestStreak : s.bestBlitz,
+        deadline: null,
       }
+    // Round-building is async, so these can arrive after the player has
+    // quit or the game ended — only accept them in phases that expect them.
     case 'FIRST_ROUND':
-      return { ...s, phase: 'playing', round: a.round }
+      if (s.phase !== 'loading') return s
+      // Start the blitz clock only now — time spent fetching the first round
+      // shouldn't count against the player.
+      return {
+        ...s,
+        phase: 'playing',
+        round: a.round,
+        deadline: s.mode === 'blitz' ? Date.now() + BLITZ_SECONDS * 1000 : null,
+      }
     case 'NEXT_READY':
+      if (s.phase !== 'loading' && s.phase !== 'playing' && s.phase !== 'reveal') return s
       return { ...s, nextRound: a.round }
     case 'ANSWER': {
       if (s.phase !== 'playing' || !s.round) return s
@@ -95,7 +135,7 @@ export function reducer(s: GameState, a: Action): GameState {
         score: correct ? s.score + 1 : s.score,
         streak: correct ? s.streak + 1 : 0,
       }
-      next.bestStreak = Math.max(next.bestStreak, next.streak)
+      if (s.mode === 'streak') next.bestStreak = Math.max(next.bestStreak, next.streak)
       if (!correct && s.mode === 'streak') {
         next.phase = 'gameover'
       }
@@ -108,8 +148,11 @@ export function reducer(s: GameState, a: Action): GameState {
       return { ...s, phase: 'playing', round: s.nextRound, nextRound: null, picked: null }
     }
     case 'TICK': {
-      if (s.mode !== 'blitz' || (s.phase !== 'playing' && s.phase !== 'reveal')) return s
-      const timeLeft = s.timeLeft - 1
+      if (s.mode !== 'blitz' || s.deadline == null) return s
+      if (s.phase !== 'playing' && s.phase !== 'reveal') return s
+      // Derive remaining time from the deadline, so a throttled/background
+      // tab or an uneven tick interval can't hand out extra seconds.
+      const timeLeft = Math.max(0, Math.ceil((s.deadline - Date.now()) / 1000))
       if (timeLeft <= 0) {
         const next = { ...s, timeLeft: 0, phase: 'gameover' as Phase }
         next.bestBlitz = Math.max(next.bestBlitz, next.score)
@@ -119,6 +162,7 @@ export function reducer(s: GameState, a: Action): GameState {
       return { ...s, timeLeft }
     }
     case 'FAIL':
+      if (s.phase !== 'loading') return s
       return { ...s, phase: 'error' }
     case 'HOME':
       return { ...initialState(), phase: 'home' }

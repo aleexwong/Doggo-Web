@@ -1,7 +1,8 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { GameState } from '../game/state'
+import { fetchRandomImage } from '../game/api'
 import { AppBar } from './PhoneFrame'
-import { PawMark, Wordmark } from './Logo'
+import { FlameSketch, PawMark, Wordmark } from './Logo'
 
 export function GameScreen({
   state,
@@ -14,6 +15,28 @@ export function GameScreen({
 }) {
   const { round, picked, phase } = state
   const revealing = phase === 'reveal' || phase === 'gameover'
+
+  // Dog.CEO occasionally serves a broken or very slow image URL. The round
+  // was preloaded, but the visible <img> is a separate request that can still
+  // fail — so on error, swap in a fresh photo of the same breed a few times
+  // rather than leave the card blank.
+  const [imgSrc, setImgSrc] = useState(round?.imageUrl)
+  const [imgTries, setImgTries] = useState(0)
+  const [imgLoaded, setImgLoaded] = useState(false)
+  useEffect(() => {
+    setImgSrc(round?.imageUrl)
+    setImgTries(0)
+    setImgLoaded(false)
+  }, [round?.imageUrl])
+  const onImgError = () => {
+    if (!round || imgTries >= 3) return
+    setImgTries((n) => n + 1)
+    fetchRandomImage(round.answer)
+      .then(setImgSrc)
+      .catch(() => {
+        /* leave the shimmer placeholder; next round will recover */
+      })
+  }
   const milestone =
     phase === 'reveal' &&
     picked === round?.answer.path &&
@@ -47,12 +70,21 @@ export function GameScreen({
       <div className="screen game">
         <div className="hud">
           <span className="chip score-chip">
-            {state.mode === 'streak' ? `🔥 Streak ${state.streak}` : `🐶 Score ${state.score}`}
+            {state.mode === 'streak' ? (
+              <><FlameSketch size={15} /> Streak {state.streak}</>
+            ) : (
+              <><PawMark size={14} /> Score {state.score}</>
+            )}
           </span>
           <span className="question">What breed is this?</span>
         </div>
-        <div className="dog-card elevated">
-          <img src={round.imageUrl} alt="A dog photo — guess the breed!" />
+        <div className={`dog-card elevated ${imgLoaded ? 'loaded' : ''}`}>
+          <img
+            src={imgSrc}
+            onError={onImgError}
+            onLoad={() => setImgLoaded(true)}
+            alt="A dog photo — guess the breed!"
+          />
           {milestone && (
             <div className="paw-burst" aria-hidden="true">
               {Array.from({ length: 8 }, (_, i) => (

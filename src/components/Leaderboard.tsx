@@ -2,9 +2,7 @@ import { useEffect, useState } from 'react'
 import { Mode, BLITZ_SECONDS } from '../game/state'
 import { Entry, fetchTop } from '../game/leaderboard'
 import { AppBar } from './PhoneFrame'
-import { PawMark, Wordmark } from './Logo'
-
-const MEDALS = ['🥇', '🥈', '🥉']
+import { PawMark, TrophySketch, Wordmark } from './Logo'
 
 export function LeaderboardScreen({
   initialMode,
@@ -33,7 +31,7 @@ export function LeaderboardScreen({
     <div className="app-shell">
       <AppBar title={<Wordmark />} onBack={onBack} />
       <div className="screen board">
-        <h2 className="board-title">Top Dogs 🏆</h2>
+        <h2 className="board-title">Top Dogs <TrophySketch size={22} /></h2>
         <div className="segmented" role="tablist" aria-label="Leaderboard mode">
           <button
             role="tab"
@@ -76,7 +74,7 @@ export function LeaderboardScreen({
           <ul className="board-list">
             {entries.map((e, i) => (
               <li key={i} className={`board-row ${i < 3 ? 'podium' : ''}`}>
-                <span className="board-rank">{MEDALS[i] ?? i + 1}</span>
+                <span className="board-rank">{i === 0 ? <TrophySketch size={18} /> : i + 1}</span>
                 <span className="board-name">{e.name}</span>
                 <span className="board-score">{e.score}</span>
               </li>
