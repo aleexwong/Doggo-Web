@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { GameState, Mode, BLITZ_SECONDS } from '../game/state'
 import {
   leaderboardEnabled,
@@ -6,10 +6,12 @@ import {
   saveNickname,
   submitScore,
   validName,
+  nameIssue,
+  guestName,
   NAME_MAX,
 } from '../game/leaderboard'
 import { AppBar } from './PhoneFrame'
-import { PawMark, Wordmark } from './Logo'
+import { DogSketch, PawMark, Wordmark } from './Logo'
 
 export function BootScreen({ onDone }: { onDone: () => void }) {
   useEffect(() => {
@@ -52,7 +54,7 @@ export function HomeScreen({
       />
       <div className="screen home">
         <div className="hero">
-          <div className="hero-avatar" aria-hidden="true">🐶</div>
+          <div className="hero-avatar" aria-hidden="true"><DogSketch size={48} /></div>
           <h1>Guess the breed!</h1>
           <p className="tagline">A photo appears — you have four choices.</p>
         </div>
@@ -87,7 +89,7 @@ export function LoadingScreen() {
     <div className="app-shell">
       <AppBar title={<Wordmark />} />
       <div className="screen loading" role="status" aria-label="Loading">
-        <div className="paw-spinner" aria-hidden="true">🐾</div>
+        <div className="paw-spinner" aria-hidden="true"><PawMark size={42} /></div>
         <p className="tagline">Fetching good dogs…</p>
       </div>
     </div>
@@ -113,23 +115,23 @@ function earnedTitle(mode: Mode, n: number): string {
   const ladder: [number, string][] =
     mode === 'streak'
       ? [
-          [50, 'Legendary Best Friend 🏆'],
-          [25, 'Dog Whisperer ✨'],
-          [15, 'Kennel Club Judge 🎖️'],
-          [10, 'Certified Dog Expert 🐾'],
-          [5, 'Good Human 🦴'],
-          [3, 'Dog Park Regular 🎾'],
-          [1, 'Puppy in Training 🐕'],
-          [0, 'Ruff Start 😅'],
+          [50, 'Legendary Best Friend'],
+          [25, 'Dog Whisperer'],
+          [15, 'Kennel Club Judge'],
+          [10, 'Certified Dog Expert'],
+          [5, 'Good Human'],
+          [3, 'Dog Park Regular'],
+          [1, 'Puppy in Training'],
+          [0, 'Ruff Start'],
         ]
       : [
-          [40, 'Speed of Zoomies 🏆'],
-          [30, 'Fastest Snoot in the West ✨'],
-          [20, 'Fetch Champion 🎖️'],
-          [12, 'Quick Sniffer 🐾'],
-          [6, 'Warming Up 🎾'],
-          [1, 'Slow and Steady 🐢'],
-          [0, 'Ruff Start 😅'],
+          [40, 'Speed of Zoomies'],
+          [30, 'Fastest Snoot in the West'],
+          [20, 'Fetch Champion'],
+          [12, 'Quick Sniffer'],
+          [6, 'Warming Up'],
+          [1, 'Slow and Steady'],
+          [0, 'Ruff Start'],
         ]
   return ladder.find(([min]) => n >= min)![1]
 }
@@ -148,17 +150,24 @@ export function GameOverScreen({
   const [copied, setCopied] = useState(false)
   const [nick, setNick] = useState(loadNickname)
   const [post, setPost] = useState<'idle' | 'saving' | 'done' | 'error'>('idle')
-  const postScore = async () => {
-    if (!validName(nick) || post === 'saving') return
+  // Move focus to the primary action when the game ends, so keyboard players
+  // can restart with Enter without hunting for the button.
+  const playAgainRef = useRef<HTMLButtonElement>(null)
+  const postScore = async (overrideName?: string) => {
+    const name = overrideName ?? nick
+    if (!validName(name) || post === 'saving') return
     setPost('saving')
     try {
-      saveNickname(nick)
-      await submitScore(state.mode, nick, state.score)
+      if (!overrideName) saveNickname(name)
+      await submitScore(state.mode, name, state.score)
       setPost('done')
     } catch {
       setPost('error')
     }
   }
+  // One-tap guest posting for players who don't want to pick a name.
+  const postAsGuest = () => postScore(guestName())
+  const issue = nameIssue(nick)
   const isStreak = state.mode === 'streak'
   const missedBreed =
     state.round && state.picked && state.picked !== state.round.answer.path
@@ -166,12 +175,20 @@ export function GameOverScreen({
       : null
   const result = state.score
   const best = isStreak ? state.bestStreak : state.bestBlitz
-  const isNewBest = result > 0 && result >= best
+  const isNewBest = result > 0 && result > state.prevBest
+  // Focus the primary action on game over so keyboard players can restart with
+  // Enter — but not when the name field is showing, so it stays typeable.
+  const showNameInput = leaderboardEnabled && result > 0 && post === 'idle'
+  useEffect(() => {
+    if (!showNameInput) playAgainRef.current?.focus()
+    // Focus once on mount for this game-over screen.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   const share = async () => {
     const feat = isStreak
       ? `${result} dog breeds in a row`
       : `${result} dog breeds in ${BLITZ_SECONDS} seconds`
-    const text = `${earnedTitle(state.mode, result)} — I named ${feat} on Doggo 🐶 ${location.href}`
+    const text = `${earnedTitle(state.mode, result)} — I named ${feat} on Doggo. ${location.href}`
     try {
       if (navigator.share) {
         await navigator.share({ text })
@@ -200,22 +217,28 @@ export function GameOverScreen({
           )}
         </div>
         {leaderboardEnabled && result > 0 && post !== 'done' && (
-          <div className="post-row">
-            <input
-              className="nick-input"
-              placeholder="Your name"
-              value={nick}
-              maxLength={NAME_MAX}
-              onChange={(e) => setNick(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && postScore()}
-              aria-label="Name for the leaderboard"
-            />
-            <button
-              className="btn-tonal"
-              disabled={!validName(nick) || post === 'saving'}
-              onClick={postScore}
-            >
-              {post === 'saving' ? 'Posting…' : 'Post score'}
+          <div className="post-block">
+            <div className="post-row">
+              <input
+                className="nick-input"
+                placeholder="Your name"
+                value={nick}
+                maxLength={NAME_MAX}
+                onChange={(e) => setNick(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && postScore()}
+                aria-label="Name for the leaderboard"
+              />
+              <button
+                className="btn-tonal"
+                disabled={!validName(nick) || post === 'saving'}
+                onClick={() => postScore()}
+              >
+                {post === 'saving' ? 'Posting…' : 'Post score'}
+              </button>
+            </div>
+            {issue && nick.trim().length > 0 && <p className="post-hint">{issue}</p>}
+            <button className="btn-text guest-link" onClick={postAsGuest} disabled={post === 'saving'}>
+              or post as guest
             </button>
           </div>
         )}
@@ -225,10 +248,10 @@ export function GameOverScreen({
         {post === 'done' && (
           <p className="post-note posted">
             Posted!{' '}
-            <button className="btn-text inline" onClick={onBoard}>See Top Dogs 🏆</button>
+            <button className="btn-text inline" onClick={onBoard}>See Top Dogs</button>
           </p>
         )}
-        <button className="btn-filled" onClick={onPlayAgain}>Play again</button>
+        <button ref={playAgainRef} className="btn-filled" onClick={onPlayAgain}>Play again</button>
         <div className="row">
           <button className="btn-tonal" onClick={share}>{copied ? 'Copied!' : 'Share score'}</button>
           {leaderboardEnabled && (

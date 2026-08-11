@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useReducer, useRef, useState } from 'react'
+import { useCallback, useEffect, useReducer, useState } from 'react'
 import { LeaderboardScreen } from './components/Leaderboard'
 import { PhoneFrame } from './components/PhoneFrame'
 import { GameScreen } from './components/GameScreen'
@@ -19,45 +19,35 @@ export default function App() {
   const [state, dispatch] = useReducer(reducer, undefined, initialState)
   const [breeds, setBreeds] = useState<Breed[] | null>(null)
   const [showBoard, setShowBoard] = useState(false)
-  const breedsRef = useRef<Breed[] | null>(null)
 
   useEffect(() => {
-    fetchBreeds().then((b) => {
-      breedsRef.current = b
-      setBreeds(b)
-    })
+    fetchBreeds().then(setBreeds)
   }, [])
 
-  const start = useCallback((mode: Mode) => {
-    dispatch({ type: 'START', mode })
-    const b = breedsRef.current
-    if (!b) return
-    buildRound(b)
+  const start = useCallback((mode: Mode) => dispatch({ type: 'START', mode }), [])
+
+  // Fill the current round whenever we're loading: fresh start, breeds
+  // arriving after start, or advancing past a round that wasn't prefetched.
+  // The reducer ignores these dispatches if the player quit meanwhile.
+  useEffect(() => {
+    if (state.phase !== 'loading' || state.round || !breeds) return
+    buildRound(breeds)
       .then((round) => {
         dispatch({ type: 'FIRST_ROUND', round })
         // Prefetch the following round immediately.
-        return buildRound(b)
+        return buildRound(breeds)
       })
       .then((round) => dispatch({ type: 'NEXT_READY', round }))
       .catch(() => dispatch({ type: 'FAIL' }))
-  }, [])
-
-  // If breeds arrive after the player already hit start.
-  useEffect(() => {
-    if (breeds && state.phase === 'loading' && !state.round) {
-      start(state.mode)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [breeds])
+  }, [state.phase, state.round, breeds])
 
   // After an answer reveal, advance and prefetch the next-next round.
   useEffect(() => {
     if (state.phase !== 'reveal') return
     const id = setTimeout(() => {
       dispatch({ type: 'ADVANCE' })
-      const b = breedsRef.current
-      if (b) {
-        buildRound(b)
+      if (breeds) {
+        buildRound(breeds)
           .then((round) => dispatch({ type: 'NEXT_READY', round }))
           .catch(() => {
             /* next ADVANCE falls back to loading state and retries */
@@ -65,22 +55,14 @@ export default function App() {
       }
     }, REVEAL_MS)
     return () => clearTimeout(id)
-  }, [state.phase, state.round])
-
-  // Recover if we advanced without a prefetched round.
-  useEffect(() => {
-    if (state.phase === 'loading' && state.round === null && breedsRef.current && state.score + state.streak > 0) {
-      buildRound(breedsRef.current)
-        .then((round) => dispatch({ type: 'FIRST_ROUND', round }))
-        .catch(() => dispatch({ type: 'FAIL' }))
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.phase])
+  }, [state.phase, state.round, breeds])
 
   // Blitz countdown.
   useEffect(() => {
     if (state.mode !== 'blitz' || (state.phase !== 'playing' && state.phase !== 'reveal')) return
-    const id = setInterval(() => dispatch({ type: 'TICK' }), 1000)
+    // Poll faster than 1s: TICK derives the remaining time from the deadline,
+    // so a sub-second interval just keeps the displayed countdown accurate.
+    const id = setInterval(() => dispatch({ type: 'TICK' }), 250)
     return () => clearInterval(id)
   }, [state.mode, state.phase])
 
