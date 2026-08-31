@@ -190,6 +190,25 @@ console.log('suite: storage resilience')
   await page.close()
 }
 
+// ---- Suite 2d: theme toggle flips and persists ----
+console.log('suite: theme')
+{
+  const page = await newGamePage()
+  const before = await page.getAttribute('html', 'data-theme')
+  await page.click('.appbar-icon[aria-label^="Switch to"]')
+  const after = await page.getAttribute('html', 'data-theme')
+  const saved = await page.evaluate(() => localStorage.getItem('doggo.theme'))
+  after !== before && after === saved
+    ? ok(`theme toggles ${before} -> ${after} and persists`)
+    : fail(`theme ${before} -> ${after}, stored ${saved}`)
+  await page.reload()
+  await page.waitForSelector('.mode-card', { timeout: 8000 })
+  ;(await page.getAttribute('html', 'data-theme')) === after
+    ? ok('theme survives a reload')
+    : fail('theme reset on reload')
+  await page.close()
+}
+
 // ---- Suite 3: leaderboard against mocked Firestore ----
 console.log('suite: leaderboard')
 {

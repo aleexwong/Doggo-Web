@@ -10,6 +10,7 @@ import {
   GameOverScreen,
 } from './components/screens'
 import { initialState, reducer, Mode } from './game/state'
+import { useTheme } from './game/theme'
 import { Breed, fetchBreeds } from './game/api'
 import { buildRound } from './game/rounds'
 
@@ -19,6 +20,7 @@ export default function App() {
   const [state, dispatch] = useReducer(reducer, undefined, initialState)
   const [breeds, setBreeds] = useState<Breed[] | null>(null)
   const [showBoard, setShowBoard] = useState(false)
+  const [theme, toggleTheme] = useTheme()
 
   useEffect(() => {
     fetchBreeds().then(setBreeds)
@@ -72,7 +74,12 @@ export default function App() {
     <div className="page">
       <PhoneFrame dark={state.phase === 'boot'}>
         {showBoard ? (
-          <LeaderboardScreen initialMode={state.mode} onBack={() => setShowBoard(false)} />
+          <LeaderboardScreen
+            initialMode={state.mode}
+            theme={theme}
+            onToggleTheme={toggleTheme}
+            onBack={() => setShowBoard(false)}
+          />
         ) : (
           <>
             {state.phase === 'boot' && <BootScreen onDone={() => dispatch({ type: 'BOOTED' })} />}
@@ -80,6 +87,8 @@ export default function App() {
               <HomeScreen
                 bestStreak={state.bestStreak}
                 bestBlitz={state.bestBlitz}
+                theme={theme}
+                onToggleTheme={toggleTheme}
                 onStart={start}
                 onBoard={() => setShowBoard(true)}
               />

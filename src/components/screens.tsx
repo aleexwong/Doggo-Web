@@ -10,8 +10,10 @@ import {
   guestName,
   NAME_MAX,
 } from '../game/leaderboard'
+import { Theme } from '../game/theme'
 import { AppBar } from './PhoneFrame'
 import { DogSketch, PawMark, Wordmark } from './Logo'
+import { ChevronIcon, LeaderboardIcon, ThemeIcon } from './icons'
 
 export function BootScreen({ onDone }: { onDone: () => void }) {
   useEffect(() => {
@@ -27,14 +29,31 @@ export function BootScreen({ onDone }: { onDone: () => void }) {
   )
 }
 
+/** Theme switch, shown in the app bar the way a current Android app does. */
+export function ThemeButton({ theme, onToggle }: { theme: Theme; onToggle: () => void }) {
+  return (
+    <button
+      className="appbar-icon state-layer"
+      onClick={onToggle}
+      aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+    >
+      <ThemeIcon dark={theme === 'dark'} />
+    </button>
+  )
+}
+
 export function HomeScreen({
   bestStreak,
   bestBlitz,
+  theme,
+  onToggleTheme,
   onStart,
   onBoard,
 }: {
   bestStreak: number
   bestBlitz: number
+  theme: Theme
+  onToggleTheme: () => void
   onStart: (mode: Mode) => void
   onBoard: () => void
 }) {
@@ -43,41 +62,46 @@ export function HomeScreen({
       <AppBar
         title={<Wordmark />}
         trailing={
-          leaderboardEnabled && (
-          <button className="appbar-icon" onClick={onBoard} aria-label="Leaderboard">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M19 5h-2V3H7v2H5a2 2 0 0 0-2 2v1c0 2.55 1.92 4.63 4.39 4.94A5.01 5.01 0 0 0 11 15.9V19H7v2h10v-2h-4v-3.1a5.01 5.01 0 0 0 3.61-2.96C19.08 12.63 21 10.55 21 8V7a2 2 0 0 0-2-2ZM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8Zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1Z" />
-            </svg>
-          </button>
-          )
+          <>
+            <ThemeButton theme={theme} onToggle={onToggleTheme} />
+            {leaderboardEnabled && (
+              <button className="appbar-icon state-layer" onClick={onBoard} aria-label="Leaderboard">
+                <LeaderboardIcon />
+              </button>
+            )}
+          </>
         }
       />
       <div className="screen home">
         <div className="hero">
-          <div className="hero-avatar" aria-hidden="true"><DogSketch size={48} /></div>
+          <div className="hero-avatar" aria-hidden="true"><DogSketch size={50} /></div>
           <h1>Guess the breed!</h1>
           <p className="tagline">A photo appears — you have four choices.</p>
         </div>
-        <button className="mode-card" onClick={() => onStart('streak')}>
-          <span className="mode-icon streak-icon" aria-hidden="true">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 0.7s.8 2.9.8 5.2c0 2.2-1.5 4-3.7 4S6.9 8.1 6.9 5.9c0-.5 0-1 .1-1.4C4.7 6.9 3 10 3 13.2 3 18.1 7 22 12 22s9-3.9 9-8.8c0-6-4.3-10.7-7.5-12.5ZM12 19.5c-1.9 0-3.4-1.5-3.4-3.4 0-1.7 1.1-2.9 3-3.3 1.9-.4 3.9-1.3 5-2.9.4 1.3.7 2.7.7 4.1 0 3-2.4 5.5-5.3 5.5Z"/></svg>
-          </span>
-          <span className="mode-text">
-            <span className="mode-name">Endless Streak</span>
-            <span className="mode-desc">Play until you miss</span>
-          </span>
-          <span className="mode-best">{bestStreak > 0 ? `Best ${bestStreak}` : 'New'}</span>
-        </button>
-        <button className="mode-card" onClick={() => onStart('blitz')}>
-          <span className="mode-icon blitz-icon" aria-hidden="true">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M15 1H9v2h6V1Zm-4 13h2V8h-2v6Zm8.03-6.61 1.42-1.42-1.42-1.42-1.42 1.42A8.96 8.96 0 0 0 12 4a9 9 0 1 0 9 9c0-2.12-.74-4.07-1.97-5.61ZM12 20a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg>
-          </span>
-          <span className="mode-text">
-            <span className="mode-name">{BLITZ_SECONDS}s Blitz</span>
-            <span className="mode-desc">Beat the clock</span>
-          </span>
-          <span className="mode-best">{bestBlitz > 0 ? `Best ${bestBlitz}` : 'New'}</span>
-        </button>
+        <div className="mode-list">
+          <button className="mode-card streak state-layer" onClick={() => onStart('streak')}>
+            <span className="mode-icon" aria-hidden="true">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 0.7s.8 2.9.8 5.2c0 2.2-1.5 4-3.7 4S6.9 8.1 6.9 5.9c0-.5 0-1 .1-1.4C4.7 6.9 3 10 3 13.2 3 18.1 7 22 12 22s9-3.9 9-8.8c0-6-4.3-10.7-7.5-12.5ZM12 19.5c-1.9 0-3.4-1.5-3.4-3.4 0-1.7 1.1-2.9 3-3.3 1.9-.4 3.9-1.3 5-2.9.4 1.3.7 2.7.7 4.1 0 3-2.4 5.5-5.3 5.5Z"/></svg>
+            </span>
+            <span className="mode-text">
+              <span className="mode-name">Endless Streak</span>
+              <span className="mode-desc">Play until you miss</span>
+            </span>
+            <span className="mode-best">{bestStreak > 0 ? `Best ${bestStreak}` : 'New'}</span>
+            <ChevronIcon />
+          </button>
+          <button className="mode-card blitz state-layer" onClick={() => onStart('blitz')}>
+            <span className="mode-icon" aria-hidden="true">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M15 1H9v2h6V1Zm-4 13h2V8h-2v6Zm8.03-6.61 1.42-1.42-1.42-1.42-1.42 1.42A8.96 8.96 0 0 0 12 4a9 9 0 1 0 9 9c0-2.12-.74-4.07-1.97-5.61ZM12 20a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg>
+            </span>
+            <span className="mode-text">
+              <span className="mode-name">{BLITZ_SECONDS}s Blitz</span>
+              <span className="mode-desc">Beat the clock</span>
+            </span>
+            <span className="mode-best">{bestBlitz > 0 ? `Best ${bestBlitz}` : 'New'}</span>
+            <ChevronIcon />
+          </button>
+        </div>
         <p className="home-footnote">Photos from Dog.CEO · no sign-in needed</p>
       </div>
     </div>
@@ -89,7 +113,9 @@ export function LoadingScreen() {
     <div className="app-shell">
       <AppBar title={<Wordmark />} />
       <div className="screen loading" role="status" aria-label="Loading">
-        <div className="paw-spinner" aria-hidden="true"><PawMark size={42} /></div>
+        <div className="m3-loader" aria-hidden="true">
+          <span className="m3-loader-shape"><PawMark size={30} /></span>
+        </div>
         <p className="tagline">Fetching good dogs…</p>
       </div>
     </div>
@@ -104,7 +130,7 @@ export function ErrorScreen({ onRetry, onHome }: { onRetry: () => void; onHome: 
         <div className="error-paw" aria-hidden="true"><PawMark size={56} /></div>
         <p className="error-title">The dogs are napping</p>
         <p className="tagline">Couldn't reach the dog photo service.</p>
-        <button className="btn-filled" onClick={onRetry}>Try again</button>
+        <button className="btn-filled state-layer" onClick={onRetry}>Try again</button>
       </div>
     </div>
   )
@@ -229,7 +255,7 @@ export function GameOverScreen({
                 aria-label="Name for the leaderboard"
               />
               <button
-                className="btn-tonal"
+                className="btn-tonal state-layer"
                 disabled={!validName(nick) || post === 'saving'}
                 onClick={() => postScore()}
               >
@@ -237,7 +263,7 @@ export function GameOverScreen({
               </button>
             </div>
             {issue && nick.trim().length > 0 && <p className="post-hint">{issue}</p>}
-            <button className="btn-text guest-link" onClick={postAsGuest} disabled={post === 'saving'}>
+            <button className="btn-text guest-link state-layer" onClick={postAsGuest} disabled={post === 'saving'}>
               or post as guest
             </button>
           </div>
@@ -248,16 +274,18 @@ export function GameOverScreen({
         {post === 'done' && (
           <p className="post-note posted">
             Posted!{' '}
-            <button className="btn-text inline" onClick={onBoard}>See Top Dogs</button>
+            <button className="btn-text inline state-layer" onClick={onBoard}>See Top Dogs</button>
           </p>
         )}
-        <button ref={playAgainRef} className="btn-filled" onClick={onPlayAgain}>Play again</button>
-        <div className="row">
-          <button className="btn-tonal" onClick={share}>{copied ? 'Copied!' : 'Share score'}</button>
+        <button ref={playAgainRef} className="btn-filled play-again state-layer" onClick={onPlayAgain}>
+          Play again
+        </button>
+        <div className="btn-group row">
+          <button className="btn-tonal state-layer" onClick={share}>{copied ? 'Copied!' : 'Share'}</button>
           {leaderboardEnabled && (
-            <button className="btn-text" onClick={onBoard}>Leaderboard</button>
+            <button className="btn-tonal state-layer" onClick={onBoard}>Top Dogs</button>
           )}
-          <button className="btn-text" onClick={onHome}>Home</button>
+          <button className="btn-tonal state-layer" onClick={onHome}>Home</button>
         </div>
       </div>
     </div>

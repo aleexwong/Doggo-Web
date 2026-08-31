@@ -8,10 +8,25 @@
     <meta property="og:title" content="Doggo — Guess the Breed" />
     <meta property="og:description" content="A photo appears, you get four choices. How long can you keep the streak alive?" />
     <meta property="og:type" content="website" />
-    <meta name="theme-color" content="#3e6837" />
+    <meta name="theme-color" content="#f6fbf0" />
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
     <link rel="apple-touch-icon" href="/icon.svg" />
     <link rel="manifest" href="/manifest.webmanifest" />
+    <script>
+      // Apply the stored/system theme before first paint so the app never
+      // flashes light on a dark device. Colours mirror --m3-surface and the
+      // SURFACE map in src/game/theme.ts.
+      try {
+        var t = localStorage.getItem('doggo.theme')
+        if (t !== 'light' && t !== 'dark')
+          t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+        document.documentElement.dataset.theme = t
+        document.querySelector('meta[name="theme-color"]').content =
+          t === 'dark' ? '#10140f' : '#f6fbf0'
+      } catch (e) {
+        /* storage or matchMedia blocked - CSS media query still applies */
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

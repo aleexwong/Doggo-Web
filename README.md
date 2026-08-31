@@ -13,6 +13,23 @@ on a personal site via iframe.
 Photos from the free [Dog.CEO API](https://dog.ceo/dog-api/). No auth — best
 scores live in `localStorage`.
 
+## Design
+
+The UI follows **Material 3 Expressive** (the current Android look) rather than
+the flat-primary-app-bar Material of a few releases back:
+
+- Full M3 colour roles with a surface-container ramp, in a light **and** dark
+  scheme. The theme follows the system by default; the app bar carries a
+  toggle, and the choice persists in `localStorage`.
+- Surface-coloured top app bar drawn edge to edge under the status bar, tonal
+  containers instead of drop shadows, and the M3 shape scale.
+- Expressive interaction: pill controls morph toward a squircle on press with
+  a spring curve, buttons and rows carry state layers, and the leaderboard
+  uses the grouped-list shape (large corners outside, tight corners inside).
+- A wavy progress indicator for the blitz clock and the streak's progress to
+  its next milestone, and a shape-morphing loading indicator.
+- Everything is gated behind `prefers-reduced-motion`.
+
 ## Leaderboard setup (Firebase)
 
 Scores can be posted to a global "Top Dogs" leaderboard via the Firestore

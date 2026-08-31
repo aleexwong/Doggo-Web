@@ -1,14 +1,21 @@
-import { useEffect, useState } from 'react'
+import { CSSProperties, useEffect, useState } from 'react'
 import { Mode, BLITZ_SECONDS } from '../game/state'
 import { Entry, fetchTop } from '../game/leaderboard'
+import { Theme } from '../game/theme'
 import { AppBar } from './PhoneFrame'
+import { ThemeButton } from './screens'
 import { PawMark, TrophySketch, Wordmark } from './Logo'
+import { CheckIcon } from './icons'
 
 export function LeaderboardScreen({
   initialMode,
+  theme,
+  onToggleTheme,
   onBack,
 }: {
   initialMode: Mode
+  theme: Theme
+  onToggleTheme: () => void
   onBack: () => void
 }) {
   const [mode, setMode] = useState<Mode>(initialMode)
@@ -27,28 +34,31 @@ export function LeaderboardScreen({
     }
   }, [mode])
 
+  /** M3 segmented button: the selected segment grows a check mark. */
+  const seg = (value: Mode, label: string) => (
+    <button
+      role="tab"
+      aria-selected={mode === value}
+      className={`seg state-layer ${mode === value ? 'active' : ''}`}
+      onClick={() => setMode(value)}
+    >
+      <span className="seg-check" aria-hidden="true"><CheckIcon size={16} /></span>
+      {label}
+    </button>
+  )
+
   return (
     <div className="app-shell">
-      <AppBar title={<Wordmark />} onBack={onBack} />
+      <AppBar
+        title={<Wordmark />}
+        onBack={onBack}
+        trailing={<ThemeButton theme={theme} onToggle={onToggleTheme} />}
+      />
       <div className="screen board">
-        <h2 className="board-title">Top Dogs <TrophySketch size={22} /></h2>
+        <h2 className="board-title">Top Dogs <TrophySketch size={24} /></h2>
         <div className="segmented" role="tablist" aria-label="Leaderboard mode">
-          <button
-            role="tab"
-            aria-selected={mode === 'streak'}
-            className={mode === 'streak' ? 'seg active' : 'seg'}
-            onClick={() => setMode('streak')}
-          >
-            Streak
-          </button>
-          <button
-            role="tab"
-            aria-selected={mode === 'blitz'}
-            className={mode === 'blitz' ? 'seg active' : 'seg'}
-            onClick={() => setMode('blitz')}
-          >
-            {BLITZ_SECONDS}s Blitz
-          </button>
+          {seg('streak', 'Streak')}
+          {seg('blitz', `${BLITZ_SECONDS}s Blitz`)}
         </div>
 
         {failed && (
@@ -73,7 +83,11 @@ export function LeaderboardScreen({
         {!failed && entries !== null && entries.length > 0 && (
           <ul className="board-list">
             {entries.map((e, i) => (
-              <li key={i} className={`board-row ${i < 3 ? 'podium' : ''}`}>
+              <li
+                key={i}
+                className={`board-row ${i < 3 ? `podium-${i + 1}` : ''}`}
+                style={{ '--i': i } as CSSProperties}
+              >
                 <span className="board-rank">{i === 0 ? <TrophySketch size={18} /> : i + 1}</span>
                 <span className="board-name">{e.name}</span>
                 <span className="board-score">{e.score}</span>
