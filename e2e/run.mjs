@@ -256,6 +256,39 @@ console.log('suite: leaderboard')
   await page.close()
 }
 
+// ---- Suite 3b: arcade high-score table ----
+console.log('suite: arcade board')
+{
+  const page = await newGamePage()
+  const ROWS = [['Rufus', 42], ['Guest-4821', 32], ['Nala', 7]]
+  await page.route(/https:\/\/firestore\.googleapis\.com\/.*/, (route) =>
+    route.request().url().includes(':runQuery')
+      ? route.fulfill({
+          json: ROWS.map(([name, score]) => ({
+            document: { fields: { name: { stringValue: name }, score: { integerValue: String(score) } } },
+          })),
+        })
+      : route.fulfill({ json: {} }))
+  await page.click('.appbar-icon[aria-label="Leaderboard"]')
+  await page.waitForSelector('.board-row:not(.skeleton)', { timeout: 4000 })
+
+  const ranks = await page.$$eval('.board-row', (els) => els.map((e) => e.querySelector('.board-rank').textContent))
+  ranks.join(',') === '1ST,2ND,3RD' ? ok('ranks read 1ST/2ND/3RD') : fail('ranks: ' + ranks)
+
+  const scores = await page.$$eval('.board-score', (els) => els.slice(1).map((e) => e.textContent))
+  scores.join(',') === '042,032,007' ? ok('scores zero-padded') : fail('scores: ' + scores)
+
+  // Guest handles are marked anonymous; chosen names are not.
+  const anon = await page.$$eval('.board-row.anon', (els) => els.map((e) => e.textContent))
+  anon.length === 1 && anon[0].includes('Guest-4821')
+    ? ok('guest row marked anonymous')
+    : fail('anon rows: ' + JSON.stringify(anon))
+  ;(await page.$('.board-row.anon .ghost-mark'))
+    ? ok('anonymous row carries a ghost')
+    : fail('no ghost sprite on the guest row')
+  await page.close()
+}
+
 // ---- Suite 4: profanity filter + guest posting ----
 console.log('suite: guest + profanity')
 {

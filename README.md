@@ -44,7 +44,28 @@ the rank ladder no longer says "Ruff Start", "Dog Whisperer" or "Fastest
 Snoot in the West", and error text states plainly what failed. Three names
 are kept as deliberate exceptions because they are the app's own labels and
 the surrounding icons carry the meaning: **Blitz**, **Streak**, and **Top
-Dogs**.
+Dogs**. `1UP` on the leaderboard is decoration, not instruction.
+
+### Arcade leaderboard
+
+**Top Dogs** is the one screen that steps outside the Material theme — it is a
+cabinet high-score table, always dark whatever the app theme, drawn in a fixed
+arcade palette that reads no `--m3-*` token:
+
+- `1UP` / `HIGH SCORE` strip, a two-frame chomping Pac-Man, and a caret menu
+  in place of the segmented button.
+- `RANK · NAME · SCORE` columns, ordinal ranks (`1ST`, `2ND`…), zero-padded
+  scores, and pellets as the dot leader. First three places take Pac-Man
+  yellow, Inky cyan and Pinky pink.
+- Loading is a line of pellets running past, as if something is eating them.
+- CRT scanlines and tube vignette over the whole screen; the phone's system
+  bars follow it dark.
+
+**Anonymous players** are first-class here. A player who taps *post without a
+name* gets a stable `Guest-####` handle, and the board renders those rows with
+a ghost sprite (Blinky, Pinky, Inky, Clyde by position) and a dimmed name, so
+they read as deliberate rather than broken. The blinking footer says how to
+get on the board without an account.
 
 ### Device frame
 

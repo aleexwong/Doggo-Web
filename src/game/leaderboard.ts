@@ -44,6 +44,11 @@ export function validName(name: string): boolean {
   return nameIssue(name) === null
 }
 
+/** A handle minted by `guestName` — the board marks these as anonymous. */
+export function isGuestName(name: string): boolean {
+  return /^Guest-\d{4}$/.test(name.trim())
+}
+
 // Stable per-device guest handle, so a player who doesn't want to pick a name
 // can still appear on the board (and keep the same identity across posts).
 const GUEST_KEY = 'doggo.guestName'

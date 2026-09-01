@@ -72,14 +72,10 @@ export default function App() {
 
   return (
     <div className="page">
-      <PhoneFrame dark={state.phase === 'boot'}>
+      {/* The arcade leaderboard runs dark, so the system bars follow it. */}
+      <PhoneFrame dark={state.phase === 'boot' || showBoard}>
         {showBoard ? (
-          <LeaderboardScreen
-            initialMode={state.mode}
-            theme={theme}
-            onToggleTheme={toggleTheme}
-            onBack={() => setShowBoard(false)}
-          />
+          <LeaderboardScreen initialMode={state.mode} onBack={() => setShowBoard(false)} />
         ) : (
           <>
             {state.phase === 'boot' && <BootScreen onDone={() => dispatch({ type: 'BOOTED' })} />}
