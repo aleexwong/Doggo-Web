@@ -13,6 +13,26 @@ on a personal site via iframe.
 Photos from the free [Dog.CEO API](https://dog.ceo/dog-api/). No auth — best
 scores live in `localStorage`.
 
+## Two presentations
+
+One build ships both, chosen by a query string:
+
+| URL | What you get |
+| --- | --- |
+| `/` or `?frame=phone` | The screens inside a drawn Android device (**default**) |
+| `?frame=web` | The same screens filling the browser, laid out responsively |
+
+The frameless version is a real web layout, not a stretched phone column: a
+full-width header over a centred content column, and at ≥900px (given the
+height for it) the game screen splits in two — photo on the left, question and
+answers stacked on the right, one answer per row. The arcade leaderboard goes
+edge to edge and reads like an attract screen. Credits sit under the phone
+when there is one, and on the home screen when there isn't.
+
+To swap which you get without a query string, change `DEFAULT_FRAME` in
+[`src/game/layout.ts`](src/game/layout.ts) — that one constant is the whole
+switch.
+
 ## Design
 
 The UI follows **Material 3 Expressive** (the current Android look) rather than
@@ -139,6 +159,8 @@ Locally, point the suite at a pre-installed browser with
 
 ## Embed (Next.js site)
 
+The device presentation suits a narrow slot on a page:
+
 ```html
 <iframe
   src="https://<deployed-url>"
@@ -146,5 +168,17 @@ Locally, point the suite at a pre-installed browser with
   loading="lazy"
   allow="clipboard-write"
   style="width: 400px; aspect-ratio: 9 / 21; border: 0"
+/>
+```
+
+The frameless one suits a full-width block, and fills whatever box you give it:
+
+```html
+<iframe
+  src="https://<deployed-url>/?frame=web"
+  title="Doggo dog breed guessing game"
+  loading="lazy"
+  allow="clipboard-write"
+  style="width: 100%; height: 720px; border: 0"
 />
 ```

@@ -101,6 +101,17 @@ export function HomeScreen({
           </button>
         </div>
         <p className="home-footnote">Photos from Dog.CEO · no account needed</p>
+        {/* Shown only in the frameless presentation — see .home-credits. */}
+        <p className="home-credits">
+          A web remake of the{' '}
+          <a href="https://github.com/aleexwong/Doggo" target="_blank" rel="noreferrer">
+            Doggo Android app
+          </a>{' '}
+          · photos by{' '}
+          <a href="https://dog.ceo/dog-api/" target="_blank" rel="noreferrer">
+            Dog.CEO
+          </a>
+        </p>
       </div>
     </div>
   )

@@ -48,7 +48,7 @@ const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PAT
 
 /** New page with dog.ceo mocked; imageDelay slows round-building.
  *  `init` runs in the page before any app code (e.g. to break localStorage). */
-async function newGamePage({ imageDelay = 0, init } = {}) {
+async function newGamePage({ imageDelay = 0, init, query = '' } = {}) {
   const page = await browser.newPage()
   if (init) await page.addInitScript(init)
   await page.route('https://dog.ceo/api/breeds/list/all', (r) =>
@@ -59,7 +59,7 @@ async function newGamePage({ imageDelay = 0, init } = {}) {
     await r.fulfill({ json: { message: `https://images.dog.ceo/${breed}.jpg`, status: 'success' } })
   })
   await page.route(/https:\/\/images\.dog\.ceo\/.*/, (r) => r.fulfill({ contentType: 'image/jpeg', body: JPEG }))
-  await page.goto(`http://localhost:${PORT}/`)
+  await page.goto(`http://localhost:${PORT}/${query}`)
   await page.waitForSelector('.mode-card', { timeout: 8000 })
   return page
 }
@@ -325,6 +325,36 @@ console.log('suite: guest + profanity')
   const guest = store.web_leaderboard_streak[0]?.name?.stringValue
   const isGuestHandle = /^Guest-\d{4}$/.test(guest || '')
   isGuestHandle ? ok(`guest posted as ${guest}`) : fail('guest name: ' + guest)
+  await page.close()
+}
+
+// ---- Suite 5: frameless web presentation (?frame=web) ----
+console.log('suite: frameless web')
+{
+  const page = await newGamePage({ query: '?frame=web' })
+  const chrome = await page.$$eval('.phone, .statusbar, .gesturebar, .camera', (els) => els.length)
+  const framed = await page.$('.web-frame')
+  chrome === 0 && framed ? ok('device chrome is gone') : fail(`chrome nodes: ${chrome}, web-frame: ${!!framed}`)
+
+  // Credits move onto the home screen, since there is no space under a phone.
+  const credits = await page.locator('.home-credits').isVisible()
+  const pageFooter = await page.locator('.page > .footer').isVisible()
+  credits && !pageFooter ? ok('credits shown once, on the home screen') : fail(`credits ${credits}, footer ${pageFooter}`)
+
+  // Still a working game, not just a working layout.
+  await page.click('.mode-card:has-text("Endless Streak")')
+  await page.waitForSelector('.answer', { timeout: 8000 })
+  await clickAnswer(page, true)
+  await sleep(REVEAL_WAIT)
+  ;(await page.$('.answer.correct')) || (await page.$('.answer:not([disabled])'))
+    ? ok('a round plays through frameless')
+    : fail('round did not advance without the phone frame')
+  await page.close()
+}
+{
+  // The default presentation keeps the device, so existing embeds don't move.
+  const page = await newGamePage()
+  ;(await page.$('.phone')) ? ok('phone frame is still the default') : fail('default lost the phone frame')
   await page.close()
 }
 
