@@ -358,6 +358,32 @@ console.log('suite: frameless web')
   await page.close()
 }
 
+// ---- Suite 6: CRT presentation (?frame=arcade) ----
+console.log('suite: crt')
+{
+  const page = await newGamePage({ query: '?frame=arcade' })
+  const glass = await page.$('.crt-glass')
+  const other = await page.$$eval('.phone, .web-frame', (els) => els.length)
+  glass && other === 0 ? ok('tube replaces the other frames') : fail(`glass ${!!glass}, others ${other}`)
+
+  // A CRT wants a dark picture, so it changes the untouched default...
+  ;(await page.getAttribute('html', 'data-theme')) === 'dark'
+    ? ok('crt defaults to the dark theme')
+    : fail('crt did not default dark')
+  await page.close()
+}
+{
+  // ...but never overrides a choice the player already made.
+  const page = await newGamePage({
+    query: '?frame=arcade',
+    init: () => localStorage.setItem('doggo.theme', 'light'),
+  })
+  ;(await page.getAttribute('html', 'data-theme')) === 'light'
+    ? ok('a stored light choice still wins inside the crt')
+    : fail('crt overrode a stored theme choice')
+  await page.close()
+}
+
 await browser.close()
 server.kill()
 if (failures) {

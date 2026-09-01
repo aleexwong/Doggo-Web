@@ -18,8 +18,9 @@
       // SURFACE map in src/game/theme.ts.
       try {
         var t = localStorage.getItem('doggo.theme')
+        var crt = /[?&]frame=(arcade|crt)/i.test(location.search)
         if (t !== 'light' && t !== 'dark')
-          t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+          t = crt || matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
         document.documentElement.dataset.theme = t
         document.querySelector('meta[name="theme-color"]').content =
           t === 'dark' ? '#0f1011' : '#fcfcfc'

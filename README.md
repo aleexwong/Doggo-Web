@@ -15,12 +15,13 @@ scores live in `localStorage`.
 
 ## Two presentations
 
-One build ships both, chosen by a query string:
+One build ships all three, chosen by a query string:
 
 | URL | What you get |
 | --- | --- |
 | `/` or `?frame=phone` | The screens inside a drawn Android device (**default**) |
 | `?frame=web` | The same screens filling the browser, laid out responsively |
+| `?frame=arcade` | The screens behind the bulging glass of a CRT arcade monitor |
 
 The frameless version is a real web layout, not a stretched phone column: a
 full-width header over a centred content column, and at ≥900px (given the
@@ -28,6 +29,15 @@ height for it) the game screen splits in two — photo on the left, question and
 answers stacked on the right, one answer per row. The arcade leaderboard goes
 edge to edge and reads like an attract screen. Credits sit under the phone
 when there is one, and on the home screen when there isn't.
+
+The CRT is a 3:4 vertical cabinet monitor: a bezel, a tube whose corners bow
+the way real glass does, and one overlay carrying what a photograph of a CRT
+shows — the specular highlight where the glass bulges, scanlines, the RGB
+aperture grille, the vignette where light travels further through thicker
+glass at the edge, a slow roll bar, and a power LED. It defaults to the dark
+theme, since a bright picture on a tube looks wrong, but a theme the player
+has actually chosen still wins. The leaderboard's own CRT treatment switches
+off inside the tube rather than stacking two sets of scanlines.
 
 To swap which you get without a query string, change `DEFAULT_FRAME` in
 [`src/game/layout.ts`](src/game/layout.ts) — that one constant is the whole
@@ -168,6 +178,18 @@ The device presentation suits a narrow slot on a page:
   loading="lazy"
   allow="clipboard-write"
   style="width: 400px; aspect-ratio: 9 / 21; border: 0"
+/>
+```
+
+The CRT suits a block with room around it — give it a square-ish box:
+
+```html
+<iframe
+  src="https://<deployed-url>/?frame=arcade"
+  title="Doggo dog breed guessing game"
+  loading="lazy"
+  allow="clipboard-write"
+  style="width: 100%; max-width: 760px; height: 900px; border: 0"
 />
 ```
 

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useReducer, useState } from 'react'
 import { LeaderboardScreen } from './components/Leaderboard'
 import { PhoneFrame } from './components/PhoneFrame'
 import { WebFrame } from './components/WebFrame'
+import { ArcadeFrame } from './components/ArcadeFrame'
 import { GameScreen } from './components/GameScreen'
 import {
   BootScreen,
@@ -12,7 +13,7 @@ import {
 } from './components/screens'
 import { initialState, reducer, Mode } from './game/state'
 import { useTheme } from './game/theme'
-import { initialFrame } from './game/layout'
+import { framePrefersDark, initialFrame } from './game/layout'
 import { Breed, fetchBreeds } from './game/api'
 import { buildRound } from './game/rounds'
 
@@ -22,9 +23,10 @@ export default function App() {
   const [state, dispatch] = useReducer(reducer, undefined, initialState)
   const [breeds, setBreeds] = useState<Breed[] | null>(null)
   const [showBoard, setShowBoard] = useState(false)
-  const [theme, toggleTheme] = useTheme()
-  // Presentation is fixed for the session: ?frame=web drops the device.
+  // Presentation is fixed for the session: ?frame=web drops the device,
+  // ?frame=arcade puts it behind CRT glass.
   const [frame] = useState(initialFrame)
+  const [theme, toggleTheme] = useTheme(framePrefersDark(frame))
 
   useEffect(() => {
     fetchBreeds().then(setBreeds)
@@ -74,7 +76,6 @@ export default function App() {
 
   const onAnswer = useCallback((path: string) => dispatch({ type: 'ANSWER', path }), [])
 
-  const bare = frame === 'web'
   const screens = (
     <>
       {showBoard ? (
@@ -113,10 +114,10 @@ export default function App() {
   )
 
   return (
-    <div className={`page ${bare ? 'page-bare' : ''}`}>
-      {bare ? (
-        <WebFrame>{screens}</WebFrame>
-      ) : (
+    <div className={`page page-${frame}`}>
+      {frame === 'web' && <WebFrame>{screens}</WebFrame>}
+      {frame === 'arcade' && <ArcadeFrame>{screens}</ArcadeFrame>}
+      {frame === 'phone' && (
         // The arcade leaderboard runs dark, so the system bars follow it.
         <PhoneFrame dark={state.phase === 'boot' || showBoard}>{screens}</PhoneFrame>
       )}

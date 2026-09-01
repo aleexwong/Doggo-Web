@@ -1112,13 +1112,137 @@ button { font: inherit; cursor: pointer; color: inherit; }
 .btn-text.inline { height: auto; padding: 0 2px; font-size: 13px; font-weight: 700; }
 
 /* ============================================================
+   CRT presentation (?frame=arcade)
+   A cabinet monitor: bezel, a tube with the bowed corners of real glass,
+   and one overlay carrying everything a photo of a CRT shows — the
+   specular bulge, scanlines, the aperture grille, the vignette where the
+   glass thickens at the edge, and a slow roll bar.
+   ============================================================ */
+
+.page-arcade {
+  /* the room the cabinet stands in — dark whatever the app theme */
+  background: radial-gradient(ellipse 70% 55% at 50% 40%, #17171d 0%, #08080a 72%);
+  --stage-ink: #6d6d78;
+  --stage-link: #8fd28c;
+}
+
+.crt {
+  /* 3:4, the way a vertical arcade monitor sits in its cabinet */
+  width: min(640px, 92vw, 62vh);
+  aspect-ratio: 3 / 4;
+  position: relative;
+}
+
+.crt-bezel {
+  position: absolute;
+  inset: 0;
+  padding: 4.4%;
+  /* elliptical radii: the bezel follows the tube, it is not a rounded box */
+  border-radius: 5% / 3.8%;
+  background: linear-gradient(168deg, #2a2a30 0%, #141418 20%, #0c0c0f 58%, #1b1b20 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -3px 8px rgba(0, 0, 0, 0.75),
+    0 0 0 1px #000,
+    0 44px 90px -34px rgba(0, 0, 0, 0.95);
+}
+
+.crt-tube {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 7% / 5.2%;
+  overflow: hidden;
+  background: #05050a;
+  box-shadow:
+    0 0 0 2px rgba(0, 0, 0, 0.9),
+    0 0 0 3px rgba(255, 255, 255, 0.05),
+    0 0 26px rgba(130, 170, 255, 0.06);
+}
+
+.crt-screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--m3-surface);
+  color: var(--m3-on-surface);
+  transition: background-color var(--dur-3) var(--ease-emph);
+}
+
+.crt-glass {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: inherit;
+  background:
+    /* the giveaway that the glass bulges: a specular blob, upper left */
+    radial-gradient(ellipse 55% 38% at 26% 15%, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0) 62%),
+    /* the weaker bounce off the opposite curve */
+    radial-gradient(ellipse 46% 30% at 78% 88%, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0) 66%),
+    repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.2) 0 1px, transparent 1px 3px),
+    /* aperture grille: the RGB stripe mask of a real tube */
+    repeating-linear-gradient(
+      to right,
+      rgba(255, 0, 0, 0.045) 0 1px,
+      rgba(0, 255, 0, 0.045) 1px 2px,
+      rgba(0, 90, 255, 0.045) 2px 3px
+    );
+  /* light has further to travel through the glass at the edges */
+  box-shadow:
+    inset 0 0 50px rgba(0, 0, 0, 0.5),
+    inset 0 0 150px rgba(0, 0, 0, 0.45);
+}
+
+/* Roll bar, drifting down the way an out-of-sync tube does */
+.crt-glass::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 16%;
+  background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.035), transparent);
+  animation: crt-roll 7.5s linear infinite;
+}
+@keyframes crt-roll {
+  from { top: -18%; }
+  to { top: 100%; }
+}
+
+.crt-led {
+  position: absolute;
+  bottom: 1.5%;
+  right: 8%;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #ff4b3e;
+  box-shadow: 0 0 6px rgba(255, 75, 62, 0.9), 0 0 15px rgba(255, 75, 62, 0.4);
+}
+
+/* The tube is wider than a phone, so the content still gets a column. */
+.page-arcade .appbar,
+.page-arcade .progress-strip,
+.page-arcade .screen {
+  max-width: 520px;
+  margin-inline: auto;
+  width: 100%;
+}
+
+/* The leaderboard brings its own CRT treatment; inside the tube that would
+   be two sets of scanlines over each other. */
+.page-arcade .arcade::after { display: none; }
+
+/* ============================================================
    Frameless presentation (?frame=web)
    The same screens without the device: full-bleed backgrounds, a content
    column that widens with the viewport, and a real two-column game screen
    once there is room for one.
    ============================================================ */
 
-.page-bare {
+.page-web {
   padding: 0;
   gap: 0;
   align-items: stretch;
@@ -1135,36 +1259,36 @@ button { font: inherit; cursor: pointer; color: inherit; }
   background: var(--m3-surface);
 }
 
-/* Credits live under the phone when there is one, and on the home screen
-   when there isn't — both are always rendered, CSS picks. */
-.page-bare > .footer { display: none; }
-.phone .home-credits { display: none; }
-.home-credits { font-size: 11px; color: var(--m3-on-surface-variant); }
+/* Credits go under the frame when there is one to sit under, and onto the
+   home screen when there isn't. Both are always rendered; the frame picks. */
+.page-web > .footer { display: none; }
+.home-credits { display: none; font-size: 11px; color: var(--m3-on-surface-variant); }
+.page-web .home-credits { display: block; }
 .home-credits a { color: var(--m3-primary); }
 
 /* Content column. Backgrounds stay edge to edge; only the content is capped. */
-.page-bare .appbar,
-.page-bare .progress-strip,
-.page-bare .screen {
+.page-web .appbar,
+.page-web .progress-strip,
+.page-web .screen {
   max-width: 560px;
   margin-inline: auto;
   width: 100%;
 }
-.page-bare .appbar { padding: 8px 16px; }
-.page-bare .board { max-width: 640px; }
+.page-web .appbar { padding: 8px 16px; }
+.page-web .board { max-width: 640px; }
 
 @media (min-width: 700px) {
-  .page-bare .appbar { min-height: 60px; padding: 10px 20px; }
-  .page-bare .home { gap: 22px; }
-  .page-bare .appbar-title { font-size: 22px; }
-  .page-bare .home h1 { font-size: 40px; }
-  .page-bare .hero-avatar { width: 120px; height: 120px; }
-  .page-bare .screen { padding-inline: 20px; }
+  .page-web .appbar { min-height: 60px; padding: 10px 20px; }
+  .page-web .home { gap: 22px; }
+  .page-web .appbar-title { font-size: 22px; }
+  .page-web .home h1 { font-size: 40px; }
+  .page-web .hero-avatar { width: 120px; height: 120px; }
+  .page-web .screen { padding-inline: 20px; }
 }
 
 @media (min-width: 900px) {
-  .page-bare .appbar,
-  .page-bare .progress-strip {
+  .page-web .appbar,
+  .page-web .progress-strip {
     max-width: 1140px;
     padding-inline: 28px;
   }
@@ -1173,7 +1297,7 @@ button { font: inherit; cursor: pointer; color: inherit; }
 /* Two columns once the viewport is wide (and tall) enough to justify it:
    photo on the left, question and answers on the right. */
 @media (min-width: 900px) and (min-height: 520px) {
-  .page-bare .game {
+  .page-web .game {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(300px, 380px);
     grid-template-areas:
@@ -1185,22 +1309,22 @@ button { font: inherit; cursor: pointer; color: inherit; }
     max-width: 1140px;
     padding: 20px 28px 28px;
   }
-  .page-bare .game .hud {
+  .page-web .game .hud {
     grid-area: hud;
     align-self: end;
     flex-direction: column;
     align-items: flex-start;
     gap: 10px;
   }
-  .page-bare .game .question { font-size: 19px; color: var(--m3-on-surface); }
-  .page-bare .game .dog-card { grid-area: photo; height: min(68vh, 620px); }
-  .page-bare .game .answers {
+  .page-web .game .question { font-size: 19px; color: var(--m3-on-surface); }
+  .page-web .game .dog-card { grid-area: photo; height: min(68vh, 620px); }
+  .page-web .game .answers {
     grid-area: answers;
     align-self: start;
     grid-template-columns: 1fr;
     gap: 8px;
   }
-  .page-bare .game .answer { min-height: 58px; font-size: 15px; }
+  .page-web .game .answer { min-height: 58px; font-size: 15px; }
 }
 
 /* ---------- Error-boundary fallback (rendered outside the phone frame) ---------- */
@@ -1233,6 +1357,7 @@ button { font: inherit; cursor: pointer; color: inherit; }
   }
   .burst-paw, .burst-label { display: none; }
   .blink, .pac > :last-child { animation: none; opacity: 1; }
+  .crt-glass::after { display: none; }
   .pac > :first-child { display: none; }
   .wave-fill { -webkit-mask-position: 0 center; mask-position: 0 center; }
 }

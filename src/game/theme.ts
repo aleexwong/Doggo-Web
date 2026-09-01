@@ -24,10 +24,12 @@ function systemTheme(): Theme {
 /**
  * App theme, the way a current Android app does it: follow the system by
  * default, remember an explicit choice, and flip live when the system
- * changes underneath an undecided player.
+ * changes underneath an undecided player. `preferDark` lets a presentation
+ * that needs a dark picture (the CRT) change the untouched default without
+ * overriding a choice the player already made.
  */
-export function useTheme(): [Theme, () => void] {
-  const [theme, setTheme] = useState<Theme>(() => stored() ?? systemTheme())
+export function useTheme(preferDark = false): [Theme, () => void] {
+  const [theme, setTheme] = useState<Theme>(() => stored() ?? (preferDark ? 'dark' : systemTheme()))
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme
@@ -38,11 +40,12 @@ export function useTheme(): [Theme, () => void] {
     const mq = window.matchMedia?.('(prefers-color-scheme: dark)')
     if (!mq) return
     const onChange = () => {
-      if (!stored()) setTheme(systemTheme())
+      // A stored choice wins; so does a frame that asked for dark.
+      if (!stored() && !preferDark) setTheme(systemTheme())
     }
     mq.addEventListener('change', onChange)
     return () => mq.removeEventListener('change', onChange)
-  }, [])
+  }, [preferDark])
 
   const toggle = useCallback(() => {
     setTheme((t) => {
