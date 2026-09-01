@@ -77,7 +77,7 @@ export function GameScreen({
   const hudRight = isBlitz ? (
     <span className={`chip timer-chip ${urgent ? 'urgent' : ''}`}>{state.timeLeft}s</span>
   ) : (
-    <span className="chip">best {state.bestStreak}</span>
+    <span className="chip">Best {state.bestStreak}</span>
   )
 
   return (
@@ -92,7 +92,7 @@ export function GameScreen({
           aria-valuemin={0}
           aria-valuemax={100}
           aria-valuenow={Math.round(progress * 100)}
-          aria-label={isBlitz ? 'Time remaining' : `Progress to a ${nextMilestone} streak`}
+          aria-label={isBlitz ? 'Time remaining' : `Progress to a streak of ${nextMilestone}`}
         >
           <span className="wave-rest" />
           <span className="wave-fill" />

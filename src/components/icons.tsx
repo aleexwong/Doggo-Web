@@ -16,14 +16,6 @@ export function CloseIcon({ size = 18 }: { size?: number }) {
   )
 }
 
-export function ChevronIcon({ size = 20 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="m9.4 18-1.4-1.4 4.6-4.6-4.6-4.6L9.4 6l6 6z" />
-    </svg>
-  )
-}
-
 export function LeaderboardIcon({ size = 22 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">

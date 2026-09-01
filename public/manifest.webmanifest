@@ -1,7 +1,7 @@
 {
   "name": "Doggo — Guess the Breed",
   "short_name": "Doggo",
-  "description": "A photo appears, you get four choices. How long can you keep the streak alive?",
+  "description": "A photo appears and you choose from four dog breeds. How many can you get right in a row?",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#0f1011",

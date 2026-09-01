@@ -55,11 +55,9 @@
   --stage-ink: #4c4e52;
   --stage-link: #2c6b34;
 
-  /* Device shell (kept dark in both themes — phones have dark frames) */
-  --frame: #0b0b0c;
-  --frame-rim: #46474a;
-  --frame-inner: #202124;
-  --frame-shadow: rgba(0, 0, 0, 0.3);
+  /* Device shell. The rail itself is the same object in both themes — only
+     the shadow it casts on the desk changes. */
+  --frame-shadow: rgba(0, 0, 0, 0.32);
 
   /* Shape scale */
   --r-xs: 6px;
@@ -86,8 +84,8 @@
   --dur-4: 560ms;
 
   /* Frame geometry: inner radius = outer radius - bezel, keeps corners concentric */
-  --bezel-w: 8px;
-  --outer-r: 52px;
+  --bezel-w: 7px;
+  --outer-r: 54px;
   --inner-r: calc(var(--outer-r) - var(--bezel-w));
 }
 
@@ -129,8 +127,7 @@
   --stage: #08090a;
   --stage-ink: #8b8d92;
   --stage-link: #8fd28c;
-  --frame-rim: #55575b;
-  --frame-shadow: rgba(0, 0, 0, 0.75);
+  --frame-shadow: rgba(0, 0, 0, 0.78);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -167,8 +164,7 @@
     --stage: #08090a;
     --stage-ink: #8b8d92;
     --stage-link: #8fd28c;
-    --frame-rim: #55575b;
-    --frame-shadow: rgba(0, 0, 0, 0.75);
+    --frame-shadow: rgba(0, 0, 0, 0.78);
   }
 }
 
@@ -200,27 +196,51 @@ body {
   /* the 42vh term keeps the whole device on screen on short viewports */
   width: min(384px, 94vw, 42vh);
   aspect-ratio: 9 / 19.5;
-  background: var(--frame);
   border-radius: var(--outer-r);
   padding: var(--bezel-w);
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.06) inset,
-    0 0 0 1px var(--frame-rim),
-    0 2px 4px rgba(0, 0, 0, 0.25),
-    0 34px 70px -18px var(--frame-shadow);
   position: relative;
+  /* Only the ring around the screen is visible, so a diagonal gradient
+     across the box reads as a metal rail catching light at two corners. */
+  background: linear-gradient(
+    145deg,
+    #6b7078 0%,
+    #2a2d33 9%,
+    #101114 30%,
+    #0a0b0c 58%,
+    #24272c 84%,
+    #5e636b 100%
+  );
+  box-shadow:
+    0 0 0 0.5px rgba(0, 0, 0, 0.9),
+    0 1px 2px rgba(0, 0, 0, 0.35),
+    0 24px 44px -14px var(--frame-shadow),
+    0 56px 84px -36px var(--frame-shadow);
 }
 
-/* side buttons: volume rocker left, power right */
-.phone::before, .phone::after {
-  content: '';
+/* Earpiece slit, centred in the top bezel. */
+.phone-speaker {
   position: absolute;
-  width: 2.5px;
-  border-radius: 3px;
-  background: linear-gradient(var(--frame-rim), var(--frame-inner));
+  top: 2.5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 14%;
+  height: 2px;
+  border-radius: 1.5px;
+  background: #0a0b0d;
+  box-shadow: inset 0 -0.5px 0 rgba(255, 255, 255, 0.12);
 }
-.phone::before { left: -2.5px; top: 24%; height: 11%; }
-.phone::after { right: -2.5px; top: 30%; height: 8%; }
+
+/* Power above the volume rocker, both on the right rail. */
+.phone-btn {
+  position: absolute;
+  right: -1.5px;
+  width: 3px;
+  border-radius: 1px 2.5px 2.5px 1px;
+  background: linear-gradient(90deg, #191c21 0%, #545a63 55%, #2b2f36 100%);
+  box-shadow: 0 0.5px 0 rgba(255, 255, 255, 0.14), 0 -0.5px 0 rgba(0, 0, 0, 0.7);
+}
+.phone-btn.power { top: 21%; height: 7.5%; }
+.phone-btn.volume { top: 31%; height: 13%; }
 
 .phone-screen {
   width: 100%;
@@ -232,19 +252,23 @@ body {
   display: flex;
   flex-direction: column;
   position: relative;
+  /* the black mask between the glass and the rail */
+  box-shadow: 0 0 0 1.5px #000;
   transition: background-color var(--dur-3) var(--ease-emph);
 }
 
 .camera {
   position: absolute;
-  top: 11px;
+  top: 10px;
   left: 50%;
   transform: translateX(-50%);
-  width: 9px;
-  height: 9px;
+  width: 8.5px;
+  height: 8.5px;
   border-radius: 50%;
-  background: radial-gradient(circle at 34% 32%, #2c4a72, #04060a 60%);
-  box-shadow: 0 0 0 1.5px rgba(0, 0, 0, 0.9);
+  background: radial-gradient(circle at 32% 28%, #566d8e 0%, #15243c 36%, #04060a 74%);
+  box-shadow:
+    0 0 0 1px #000,
+    0 0 0 1.5px rgba(255, 255, 255, 0.07);
   z-index: 4;
 }
 
@@ -269,7 +293,7 @@ body {
 .app-area { flex: 1; display: flex; overflow: hidden; min-height: 0; }
 
 .gesturebar {
-  padding: 6px 0 8px;
+  padding: 7px 0 9px;
   display: flex;
   justify-content: center;
   background: var(--m3-surface);
@@ -277,8 +301,8 @@ body {
 }
 .gesturebar-dark { background: #0c0c0d; }
 .gesturebar-pill {
-  width: 36%;
-  height: 4px;
+  width: 34%;
+  height: 3.5px;
   border-radius: var(--r-full);
   background: color-mix(in srgb, var(--m3-on-surface) 45%, transparent);
 }

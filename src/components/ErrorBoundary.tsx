@@ -15,7 +15,7 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, { failed: 
       <div className="page">
         <div className="crash" role="alert">
           <PawMark size={48} />
-          <p className="crash-title">Doggo tripped over its own paws.</p>
+          <p className="crash-title">Doggo stopped working.</p>
           <button className="btn-filled" onClick={() => location.reload()}>
             Reload
           </button>

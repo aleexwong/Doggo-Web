@@ -6,8 +6,8 @@ on a personal site via iframe.
 
 ## Play
 
-- **Endless Streak** — play until you miss.
-- **60s Blitz** — identify as many breeds as you can in a minute.
+- **Endless Streak** — one mistake ends the game.
+- **60s Blitz** — answer as many as you can in a minute.
 - Keyboard: press <kbd>1</kbd>–<kbd>4</kbd> to answer.
 
 Photos from the free [Dog.CEO API](https://dog.ceo/dog-api/). No auth — best
@@ -35,6 +35,23 @@ the flat-primary-app-bar Material of a few releases back:
 - A wavy progress indicator for the blitz clock and the streak's progress to
   its next milestone, and a shape-morphing loading indicator.
 - Everything is gated behind `prefers-reduced-motion`.
+
+### Copy
+
+In-app text is written to **CEFR B2**, so a non-native reader can play
+without hitting a wall. Puns and culture references were the main casualties:
+the rank ladder no longer says "Ruff Start", "Dog Whisperer" or "Fastest
+Snoot in the West", and error text states plainly what failed. Three names
+are kept as deliberate exceptions because they are the app's own labels and
+the surrounding icons carry the meaning: **Blitz**, **Streak**, and **Top
+Dogs**.
+
+### Device frame
+
+The phone is drawn, not an image: a diagonal gradient across the padding ring
+reads as a metal rail, with an earpiece slit in the top bezel, power above the
+volume rocker on the right, a punch-hole camera in the display, and a black
+mask between glass and rail.
 
 ## Leaderboard setup (Firebase)
 

@@ -64,7 +64,7 @@ export function LeaderboardScreen({
         {failed && (
           <div className="board-empty">
             <PawMark size={40} />
-            <p className="tagline">Couldn't fetch the leaderboard right now.</p>
+            <p className="tagline">We could not load the scores.</p>
           </div>
         )}
         {!failed && entries === null && (
@@ -77,7 +77,7 @@ export function LeaderboardScreen({
         {!failed && entries !== null && entries.length === 0 && (
           <div className="board-empty">
             <PawMark size={40} />
-            <p className="tagline">No scores yet — be the first Top Dog!</p>
+            <p className="tagline">No scores yet. Be the first!</p>
           </div>
         )}
         {!failed && entries !== null && entries.length > 0 && (

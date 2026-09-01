@@ -13,7 +13,7 @@ import {
 import { Theme } from '../game/theme'
 import { AppBar } from './PhoneFrame'
 import { DogSketch, PawMark, Wordmark } from './Logo'
-import { ChevronIcon, LeaderboardIcon, ThemeIcon } from './icons'
+import { LeaderboardIcon, ThemeIcon } from './icons'
 
 export function BootScreen({ onDone }: { onDone: () => void }) {
   useEffect(() => {
@@ -85,10 +85,9 @@ export function HomeScreen({
             </span>
             <span className="mode-text">
               <span className="mode-name">Endless Streak</span>
-              <span className="mode-desc">Play until you miss</span>
+              <span className="mode-desc">One mistake ends the game</span>
             </span>
             <span className="mode-best">{bestStreak > 0 ? `Best ${bestStreak}` : 'New'}</span>
-            <ChevronIcon />
           </button>
           <button className="mode-card blitz state-layer" onClick={() => onStart('blitz')}>
             <span className="mode-icon" aria-hidden="true">
@@ -96,13 +95,12 @@ export function HomeScreen({
             </span>
             <span className="mode-text">
               <span className="mode-name">{BLITZ_SECONDS}s Blitz</span>
-              <span className="mode-desc">Beat the clock</span>
+              <span className="mode-desc">Answer as many as you can</span>
             </span>
             <span className="mode-best">{bestBlitz > 0 ? `Best ${bestBlitz}` : 'New'}</span>
-            <ChevronIcon />
           </button>
         </div>
-        <p className="home-footnote">Photos from Dog.CEO · no sign-in needed</p>
+        <p className="home-footnote">Photos from Dog.CEO · no account needed</p>
       </div>
     </div>
   )
@@ -116,7 +114,7 @@ export function LoadingScreen() {
         <div className="m3-loader" aria-hidden="true">
           <span className="m3-loader-shape"><PawMark size={30} /></span>
         </div>
-        <p className="tagline">Fetching good dogs…</p>
+        <p className="tagline">Finding good dogs…</p>
       </div>
     </div>
   )
@@ -128,8 +126,8 @@ export function ErrorScreen({ onRetry, onHome }: { onRetry: () => void; onHome: 
       <AppBar title={<Wordmark />} onBack={onHome} />
       <div className="screen error">
         <div className="error-paw" aria-hidden="true"><PawMark size={56} /></div>
-        <p className="error-title">The dogs are napping</p>
-        <p className="tagline">Couldn't reach the dog photo service.</p>
+        <p className="error-title">The dogs are sleeping</p>
+        <p className="tagline">We could not load the dog photos.</p>
         <button className="btn-filled state-layer" onClick={onRetry}>Try again</button>
       </div>
     </div>
@@ -141,23 +139,23 @@ function earnedTitle(mode: Mode, n: number): string {
   const ladder: [number, string][] =
     mode === 'streak'
       ? [
-          [50, 'Legendary Best Friend'],
-          [25, 'Dog Whisperer'],
-          [15, 'Kennel Club Judge'],
-          [10, 'Certified Dog Expert'],
-          [5, 'Good Human'],
-          [3, 'Dog Park Regular'],
+          [50, 'Legendary Dog Expert'],
+          [25, 'Master of Breeds'],
+          [15, 'Dog Show Judge'],
+          [10, 'Dog Expert'],
+          [5, 'Real Dog Lover'],
+          [3, 'Dog Park Visitor'],
           [1, 'Puppy in Training'],
-          [0, 'Ruff Start'],
+          [0, 'Just Getting Started'],
         ]
       : [
-          [40, 'Speed of Zoomies'],
-          [30, 'Fastest Snoot in the West'],
+          [40, 'Lightning Fast'],
+          [30, 'Super Speedy'],
           [20, 'Fetch Champion'],
-          [12, 'Quick Sniffer'],
-          [6, 'Warming Up'],
-          [1, 'Slow and Steady'],
-          [0, 'Ruff Start'],
+          [12, 'Quick Thinker'],
+          [6, 'Getting Faster'],
+          [1, 'Slow Start'],
+          [0, 'Just Getting Started'],
         ]
   return ladder.find(([min]) => n >= min)![1]
 }
@@ -233,8 +231,8 @@ export function GameOverScreen({
       <div className="screen gameover">
         <div className="result-card">
           <div className="final-score">{result}</div>
-          <p className="tagline">{isStreak ? 'breeds in a row' : 'breeds identified'}</p>
-          {missedBreed && <p className="missed-line">That last one was a <strong>{missedBreed}</strong></p>}
+          <p className="tagline">{isStreak ? 'breeds in a row' : 'breeds you got right'}</p>
+          {missedBreed && <p className="missed-line">The last one was a <strong>{missedBreed}</strong></p>}
           <p className="title-earned">{earnedTitle(state.mode, result)}</p>
           {isNewBest ? (
             <p className="best-line new-best">New personal best!</p>
@@ -264,17 +262,17 @@ export function GameOverScreen({
             </div>
             {issue && nick.trim().length > 0 && <p className="post-hint">{issue}</p>}
             <button className="btn-text guest-link state-layer" onClick={postAsGuest} disabled={post === 'saving'}>
-              or post as guest
+              Post without a name
             </button>
           </div>
         )}
         {post === 'error' && (
-          <p className="post-note">Couldn't reach the leaderboard — try again?</p>
+          <p className="post-note">We could not save your score. Please try again.</p>
         )}
         {post === 'done' && (
           <p className="post-note posted">
             Posted!{' '}
-            <button className="btn-text inline state-layer" onClick={onBoard}>See Top Dogs</button>
+            <button className="btn-text inline state-layer" onClick={onBoard}>See the scores</button>
           </p>
         )}
         <button ref={playAgainRef} className="btn-filled play-again state-layer" onClick={onPlayAgain}>

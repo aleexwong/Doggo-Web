@@ -36,7 +36,7 @@ export function nameIssue(name: string): string | null {
   const n = name.trim()
   if (n.length < NAME_MIN) return `At least ${NAME_MIN} characters`
   if (n.length > NAME_MAX) return `At most ${NAME_MAX} characters`
-  if (!isClean(n)) return 'Please pick a friendlier name'
+  if (!isClean(n)) return 'Please choose a different name'
   return null
 }
 
