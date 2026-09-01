@@ -18,46 +18,48 @@
 :root {
   color-scheme: light;
 
-  --m3-primary: #34693a;
+  /* Hue is a signal, not a wash: the surface ramp is neutral and the green
+     only appears where it means something (primary actions, correct
+     answers, progress). */
+  --m3-primary: #2c6b34;
   --m3-on-primary: #ffffff;
-  --m3-primary-container: #b6f2b3;
-  --m3-on-primary-container: #002106;
-  --m3-secondary: #52634f;
+  --m3-primary-container: #cdeec8;
+  --m3-on-primary-container: #06210a;
+  --m3-secondary: #4a5a4a;
   --m3-on-secondary: #ffffff;
-  --m3-secondary-container: #d5e8cf;
-  --m3-on-secondary-container: #101f10;
+  --m3-secondary-container: #e6e6e7;
+  --m3-on-secondary-container: #191a1c;
   --m3-tertiary: #8a5100;
   --m3-on-tertiary: #ffffff;
-  --m3-tertiary-container: #ffddb6;
-  --m3-on-tertiary-container: #2c1600;
-  --m3-error: #ba1a1a;
+  --m3-tertiary-container: #ffdfb8;
+  --m3-on-tertiary-container: #2b1600;
+  --m3-error: #b3261e;
   --m3-on-error: #ffffff;
-  --m3-error-container: #ffdad6;
-  --m3-on-error-container: #410002;
+  --m3-error-container: #f9dedc;
+  --m3-on-error-container: #410e0b;
 
-  --m3-surface: #f6fbf0;
+  --m3-surface: #fcfcfc;
   --m3-surface-container-lowest: #ffffff;
-  --m3-surface-container-low: #f0f5e9;
-  --m3-surface-container: #eaf0e3;
-  --m3-surface-container-high: #e4eade;
-  --m3-surface-container-highest: #dee4d8;
-  --m3-on-surface: #181d17;
-  --m3-on-surface-variant: #424940;
-  --m3-outline: #72796f;
-  --m3-outline-variant: #c2c9bd;
+  --m3-surface-container-low: #f6f6f6;
+  --m3-surface-container: #f0f0f1;
+  --m3-surface-container-high: #e9e9ea;
+  --m3-surface-container-highest: #e2e2e3;
+  --m3-on-surface: #15161a;
+  --m3-on-surface-variant: #44464a;
+  --m3-outline: #74767a;
+  --m3-outline-variant: #d5d6d9;
   --m3-shimmer: #ffffff;
 
   /* Desk the phone sits on */
-  --stage: #e9ede5;
-  --stage-glow: rgba(52, 105, 58, 0.18);
-  --stage-ink: #545a51;
-  --stage-link: #34693a;
+  --stage: #e6e6e7;
+  --stage-ink: #4c4e52;
+  --stage-link: #2c6b34;
 
   /* Device shell (kept dark in both themes — phones have dark frames) */
-  --frame: #0c0e0b;
-  --frame-rim: #454a43;
-  --frame-inner: #22261f;
-  --frame-shadow: rgba(20, 26, 18, 0.42);
+  --frame: #0b0b0c;
+  --frame-rim: #46474a;
+  --frame-inner: #202124;
+  --frame-shadow: rgba(0, 0, 0, 0.3);
 
   /* Shape scale */
   --r-xs: 6px;
@@ -95,86 +97,83 @@
 :root[data-theme='dark'] {
   color-scheme: dark;
 
-  --m3-primary: #9bd598;
-  --m3-on-primary: #05390f;
-  --m3-primary-container: #1d5121;
-  --m3-on-primary-container: #b6f2b3;
-  --m3-secondary: #b9ccb4;
-  --m3-on-secondary: #253423;
-  --m3-secondary-container: #3b4b39;
-  --m3-on-secondary-container: #d5e8cf;
+  --m3-primary: #8fd28c;
+  --m3-on-primary: #04340d;
+  --m3-primary-container: #1c4d22;
+  --m3-on-primary-container: #cdeec8;
+  --m3-secondary: #b4c2b3;
+  --m3-on-secondary: #212422;
+  --m3-secondary-container: #313235;
+  --m3-on-secondary-container: #e3e3e5;
   --m3-tertiary: #ffb951;
-  --m3-on-tertiary: #4a2800;
-  --m3-tertiary-container: #693c00;
-  --m3-on-tertiary-container: #ffddb6;
-  --m3-error: #ffb4ab;
-  --m3-on-error: #690005;
-  --m3-error-container: #93000a;
-  --m3-on-error-container: #ffdad6;
+  --m3-on-tertiary: #452700;
+  --m3-tertiary-container: #653c00;
+  --m3-on-tertiary-container: #ffdfb8;
+  --m3-error: #f2b8b5;
+  --m3-on-error: #601410;
+  --m3-error-container: #8c1d18;
+  --m3-on-error-container: #f9dedc;
 
-  --m3-surface: #10140f;
-  --m3-surface-container-lowest: #0b0f0a;
-  --m3-surface-container-low: #181d17;
-  --m3-surface-container: #1c211b;
-  --m3-surface-container-high: #262b25;
-  --m3-surface-container-highest: #313630;
-  --m3-on-surface: #e0e4db;
-  --m3-on-surface-variant: #c2c9bd;
-  --m3-outline: #8c9388;
-  --m3-outline-variant: #424940;
-  --m3-shimmer: #2e342c;
+  --m3-surface: #0f1011;
+  --m3-surface-container-lowest: #0a0a0b;
+  --m3-surface-container-low: #17181a;
+  --m3-surface-container: #1b1c1e;
+  --m3-surface-container-high: #26272a;
+  --m3-surface-container-highest: #303134;
+  --m3-on-surface: #e8e9ea;
+  --m3-on-surface-variant: #c3c5c9;
+  --m3-outline: #8d8f94;
+  --m3-outline-variant: #44464a;
+  --m3-shimmer: #303134;
 
-  --stage: #0a0d09;
-  --stage-glow: rgba(155, 213, 152, 0.12);
-  --stage-ink: #8b9287;
-  --stage-link: #9bd598;
-  --frame-rim: #565c53;
-  --frame-shadow: rgba(0, 0, 0, 0.7);
+  --stage: #08090a;
+  --stage-ink: #8b8d92;
+  --stage-link: #8fd28c;
+  --frame-rim: #55575b;
+  --frame-shadow: rgba(0, 0, 0, 0.75);
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --m3-primary: #9bd598;
-    --m3-on-primary: #05390f;
-    --m3-primary-container: #1d5121;
-    --m3-on-primary-container: #b6f2b3;
-    --m3-secondary: #b9ccb4;
-    --m3-on-secondary: #253423;
-    --m3-secondary-container: #3b4b39;
-    --m3-on-secondary-container: #d5e8cf;
+    --m3-primary: #8fd28c;
+    --m3-on-primary: #04340d;
+    --m3-primary-container: #1c4d22;
+    --m3-on-primary-container: #cdeec8;
+    --m3-secondary: #b4c2b3;
+    --m3-on-secondary: #212422;
+    --m3-secondary-container: #313235;
+    --m3-on-secondary-container: #e3e3e5;
     --m3-tertiary: #ffb951;
-    --m3-on-tertiary: #4a2800;
-    --m3-tertiary-container: #693c00;
-    --m3-on-tertiary-container: #ffddb6;
-    --m3-error: #ffb4ab;
-    --m3-on-error: #690005;
-    --m3-error-container: #93000a;
-    --m3-on-error-container: #ffdad6;
+    --m3-on-tertiary: #452700;
+    --m3-tertiary-container: #653c00;
+    --m3-on-tertiary-container: #ffdfb8;
+    --m3-error: #f2b8b5;
+    --m3-on-error: #601410;
+    --m3-error-container: #8c1d18;
+    --m3-on-error-container: #f9dedc;
 
-    --m3-surface: #10140f;
-    --m3-surface-container-lowest: #0b0f0a;
-    --m3-surface-container-low: #181d17;
-    --m3-surface-container: #1c211b;
-    --m3-surface-container-high: #262b25;
-    --m3-surface-container-highest: #313630;
-    --m3-on-surface: #e0e4db;
-    --m3-on-surface-variant: #c2c9bd;
-    --m3-outline: #8c9388;
-    --m3-outline-variant: #424940;
-    --m3-shimmer: #2e342c;
+    --m3-surface: #0f1011;
+    --m3-surface-container-lowest: #0a0a0b;
+    --m3-surface-container-low: #17181a;
+    --m3-surface-container: #1b1c1e;
+    --m3-surface-container-high: #26272a;
+    --m3-surface-container-highest: #303134;
+    --m3-on-surface: #e8e9ea;
+    --m3-on-surface-variant: #c3c5c9;
+    --m3-outline: #8d8f94;
+    --m3-outline-variant: #44464a;
+    --m3-shimmer: #303134;
 
-    --stage: #0a0d09;
-    --stage-glow: rgba(155, 213, 152, 0.12);
-    --stage-ink: #8b9287;
-    --stage-link: #9bd598;
-    --frame-rim: #565c53;
-    --frame-shadow: rgba(0, 0, 0, 0.7);
+    --stage: #08090a;
+    --stage-ink: #8b8d92;
+    --stage-link: #8fd28c;
+    --frame-rim: #55575b;
+    --frame-shadow: rgba(0, 0, 0, 0.75);
   }
 }
 
 body {
   background: var(--stage);
-  background-image: radial-gradient(120% 80% at 50% -10%, var(--stage-glow), transparent 60%);
   color: var(--stage-ink);
   font-family: Roboto, 'Roboto Flex', system-ui, 'Segoe UI', sans-serif;
   min-height: 100vh;
@@ -236,18 +235,6 @@ body {
   transition: background-color var(--dur-3) var(--ease-emph);
 }
 
-/* faint glass sheen so the screen reads as glass, not a white box */
-.phone-screen::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  z-index: 5;
-  background: linear-gradient(148deg, rgba(255, 255, 255, 0.14) 0 26%, transparent 42%);
-  mix-blend-mode: overlay;
-}
-
 .camera {
   position: absolute;
   top: 11px;
@@ -276,8 +263,8 @@ body {
   z-index: 2;
   transition: background-color var(--dur-2) var(--ease-emph), color var(--dur-2) var(--ease-emph);
 }
-.statusbar-dark { background: #0d1410; color: #e7ece3; }
-.statusbar-icons { display: flex; gap: 5px; align-items: center; opacity: 0.9; }
+.statusbar-dark { background: #0c0c0d; color: #e8e9ea; }
+.statusbar-icons { display: flex; gap: 5px; align-items: center; }
 
 .app-area { flex: 1; display: flex; overflow: hidden; min-height: 0; }
 
@@ -288,7 +275,7 @@ body {
   background: var(--m3-surface);
   transition: background-color var(--dur-2) var(--ease-emph);
 }
-.gesturebar-dark { background: #0d1410; }
+.gesturebar-dark { background: #0c0c0d; }
 .gesturebar-pill {
   width: 36%;
   height: 4px;
@@ -431,20 +418,20 @@ button { font: inherit; cursor: pointer; color: inherit; }
 }
 
 .boot {
-  background: #0d1410;
+  background: #0c0c0d;
   color: #fff;
   cursor: pointer;
   gap: 10px;
 }
-.boot-paw { color: #9bd598; animation: boot-pop 1.1s var(--spring) infinite alternate; }
+.boot-paw { color: #8fd28c; animation: boot-pop 1.1s var(--spring) infinite alternate; }
 .boot-name {
   font-family: Fredoka, Roboto, system-ui, sans-serif;
   font-size: 36px;
   font-weight: 600;
   letter-spacing: 1px;
-  color: #e7ece3;
+  color: #f2f3f4;
 }
-.boot-sub { font-size: 11px; color: #7f8a7c; letter-spacing: 2.5px; text-transform: uppercase; }
+.boot-sub { font-size: 11px; color: #83858a; letter-spacing: 2.5px; text-transform: uppercase; }
 @keyframes boot-pop {
   from { transform: translateY(4px) scale(0.94); }
   to { transform: translateY(-10px) scale(1.04); }
@@ -461,8 +448,8 @@ button { font: inherit; cursor: pointer; color: inherit; }
 .hero-avatar {
   width: 104px;
   height: 104px;
-  background: var(--m3-primary-container);
-  color: var(--m3-on-primary-container);
+  background: var(--m3-surface-container);
+  color: var(--m3-primary);
   display: grid;
   place-items: center;
   border-radius: 46% 54% 52% 48% / 50% 46% 54% 50%;
@@ -499,14 +486,14 @@ button { font: inherit; cursor: pointer; color: inherit; }
   cursor: pointer;
   text-align: left;
   font: inherit;
+  /* hairline keeps the card edge legible against a near-tone surface */
+  box-shadow: inset 0 0 0 1px var(--m3-outline-variant);
   transition:
     border-radius var(--dur-3) var(--spring),
     transform var(--dur-3) var(--spring),
     background-color var(--dur-2) var(--ease-emph);
 }
 .mode-card:active { border-radius: var(--r-m); transform: scale(0.975); }
-.mode-card.streak { background: var(--m3-primary-container); color: var(--m3-on-primary-container); }
-.mode-card.blitz { background: var(--m3-tertiary-container); color: var(--m3-on-tertiary-container); }
 
 .mode-icon {
   width: 52px;
@@ -523,18 +510,19 @@ button { font: inherit; cursor: pointer; color: inherit; }
 
 .mode-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .mode-name { font-family: Fredoka, Roboto, system-ui, sans-serif; font-weight: 600; font-size: 17px; letter-spacing: 0.1px; }
-.mode-desc { font-size: 13px; opacity: 0.75; }
+.mode-desc { font-size: 13px; color: var(--m3-on-surface-variant); }
 .mode-best {
   font-size: 12px;
   font-weight: 700;
-  padding: 5px 10px;
+  padding: 4px 10px;
   border-radius: var(--r-s);
-  background: var(--m3-surface);
-  color: var(--m3-on-surface);
+  background: transparent;
+  color: var(--m3-on-surface-variant);
+  box-shadow: inset 0 0 0 1px var(--m3-outline-variant);
   white-space: nowrap;
 }
-.mode-card > svg { flex: none; opacity: 0.55; }
-.home-footnote { font-size: 11px; color: var(--m3-on-surface-variant); opacity: 0.8; margin-top: auto; }
+.mode-card > svg { flex: none; color: var(--m3-on-surface-variant); }
+.home-footnote { font-size: 11px; color: var(--m3-on-surface-variant); margin-top: auto; }
 
 /* ---------- Loading / error ---------- */
 
@@ -546,8 +534,8 @@ button { font: inherit; cursor: pointer; color: inherit; }
   height: 64px;
   display: grid;
   place-items: center;
-  background: var(--m3-primary-container);
-  color: var(--m3-on-primary-container);
+  background: var(--m3-surface-container-high);
+  color: var(--m3-primary);
   animation: loader-morph 2.4s var(--ease-emph) infinite;
 }
 .m3-loader-shape > svg { animation: loader-spin-back 4.5s linear infinite; }
@@ -629,8 +617,8 @@ button { font: inherit; cursor: pointer; color: inherit; }
   height: 30px;
   padding: 0 12px;
   border-radius: var(--r-s);
-  background: var(--m3-secondary-container);
-  color: var(--m3-on-secondary-container);
+  background: var(--m3-surface-container-high);
+  color: var(--m3-on-surface);
   white-space: nowrap;
 }
 .score-chip svg { color: var(--m3-primary); }
@@ -643,9 +631,16 @@ button { font: inherit; cursor: pointer; color: inherit; }
   width: 100%;
   flex: 1;
   min-height: 0;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-xl);
+  position: relative;
+}
+/* Only the placeholder is a card. Once the photo arrives it sizes itself
+   and becomes the card, so there is never a letterbox band to fill. */
+.dog-card:not(.loaded) {
   border-radius: var(--r-xl);
   overflow: hidden;
-  position: relative;
   background: linear-gradient(
     110deg,
     var(--m3-surface-container) 30%,
@@ -655,31 +650,22 @@ button { font: inherit; cursor: pointer; color: inherit; }
   background-size: 200% 100%;
   animation: shimmer 1.2s linear infinite;
 }
-/* Once the photo loads, stop the loading shimmer and give letterboxed
-   images (object-fit: contain) a clean solid backdrop instead. */
-.dog-card.loaded {
-  background: var(--m3-surface-container);
-  animation: photo-in var(--dur-3) var(--ease-emph-decel);
-}
+.dog-card.loaded img { animation: photo-in var(--dur-3) var(--ease-emph-decel); }
 @keyframes photo-in { from { opacity: 0.4; transform: scale(0.98); } to { opacity: 1; transform: none; } }
 @keyframes shimmer { to { background-position: -200% 0; } }
-/* contain (not cover) so the whole dog is always in frame — no cropped
-   heads or tails, which matters when the dog is the thing to identify.
-   The letterbox bars that leaves are filled by a blurred, scaled copy of
-   the same photo, so the card reads as one image instead of a small
-   picture floating on a flat panel. */
-.dog-card img { position: relative; z-index: 1; width: 100%; height: 100%; object-fit: contain; display: block; }
-.dog-ambient {
-  position: absolute;
-  inset: 0;
-  background-size: cover;
-  background-position: center;
-  filter: blur(26px) saturate(1.3) brightness(0.78);
-  transform: scale(1.3);
-  opacity: 0;
-  transition: opacity var(--dur-4) var(--ease-emph);
+/* The whole dog is always in frame — no cropped heads or tails, which
+   matters when the dog is the thing to identify. */
+.dog-card img {
+  position: relative;
+  z-index: 1;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  display: block;
+  border-radius: var(--r-xl);
+  box-shadow: 0 0 0 1px var(--m3-outline-variant);
 }
-.dog-card.loaded .dog-ambient { opacity: 1; }
 
 /* Streak milestone celebration: paws burst out from the photo center */
 .paw-burst {
@@ -693,7 +679,7 @@ button { font: inherit; cursor: pointer; color: inherit; }
 }
 .burst-paw {
   position: absolute;
-  color: var(--m3-tertiary-container);
+  color: #ffffff;
   filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.45));
   animation: burst 0.9s var(--ease-emph-decel) forwards;
 }
@@ -768,15 +754,17 @@ button { font: inherit; cursor: pointer; color: inherit; }
 .answer.correct {
   background: var(--m3-primary-container);
   color: var(--m3-on-primary-container);
+  box-shadow: inset 0 0 0 1.5px var(--m3-primary);
   animation: correct-pop var(--dur-4) var(--spring);
 }
 @keyframes correct-pop { 0% { transform: scale(1); } 35% { transform: scale(1.06); } 100% { transform: scale(1); } }
 .answer.wrong {
   background: var(--m3-error-container);
   color: var(--m3-on-error-container);
+  box-shadow: inset 0 0 0 1.5px var(--m3-error);
   animation: shake 0.34s var(--ease-emph);
 }
-.answer.dim { opacity: 0.5; }
+.answer.dim { background: var(--m3-surface-container); color: var(--m3-on-surface-variant); }
 .answer-mark { flex: none; display: grid; place-items: center; }
 @keyframes shake {
   20% { transform: translateX(-5px); }
@@ -789,8 +777,8 @@ button { font: inherit; cursor: pointer; color: inherit; }
 .gameover { justify-content: center; gap: 12px; padding: 8px 14px 14px; }
 .result-card {
   width: 100%;
-  background: var(--m3-primary-container);
-  color: var(--m3-on-primary-container);
+  background: var(--m3-surface-container-high);
+  color: var(--m3-on-surface);
   border-radius: var(--r-2xl);
   padding: 22px 18px;
   display: flex;
@@ -810,19 +798,19 @@ button { font: inherit; cursor: pointer; color: inherit; }
   line-height: 1;
   letter-spacing: -2px;
   font-variant-numeric: tabular-nums;
+  color: var(--m3-primary);
 }
-.result-card .tagline { color: inherit; opacity: 0.8; font-size: 13px; }
+.result-card .tagline { font-size: 13px; }
 .title-earned {
   font-family: Fredoka, Roboto, system-ui, sans-serif;
   font-weight: 600;
   font-size: 17px;
   margin-top: 6px;
 }
-.best-line { font-size: 12.5px; opacity: 0.8; }
-.missed-line { font-size: 13px; opacity: 0.85; margin-top: 2px; }
+.best-line { font-size: 12.5px; color: var(--m3-on-surface-variant); }
+.missed-line { font-size: 13px; color: var(--m3-on-surface-variant); margin-top: 2px; }
 .missed-line strong { font-weight: 700; }
 .new-best {
-  opacity: 1;
   background: var(--m3-tertiary);
   color: var(--m3-on-tertiary);
   padding: 4px 12px;
@@ -844,7 +832,7 @@ button { font: inherit; cursor: pointer; color: inherit; }
   align-items: center;
   gap: 8px;
 }
-.board-title svg { color: var(--m3-tertiary); }
+.board-title svg { color: var(--m3-primary); }
 
 .segmented {
   display: flex;
@@ -893,7 +881,6 @@ button { font: inherit; cursor: pointer; color: inherit; }
 .board-list > :first-child { border-start-start-radius: var(--r-xl); border-start-end-radius: var(--r-xl); }
 .board-list > :last-child { border-end-start-radius: var(--r-xl); border-end-end-radius: var(--r-xl); }
 .board-row.podium-1 { background: var(--m3-primary-container); color: var(--m3-on-primary-container); }
-.board-row.podium-2, .board-row.podium-3 { background: var(--m3-secondary-container); color: var(--m3-on-secondary-container); }
 .board-row.skeleton {
   height: 48px;
   animation: shimmer 1.2s linear infinite;
@@ -921,7 +908,7 @@ button { font: inherit; cursor: pointer; color: inherit; }
   font-size: 18px;
   font-variant-numeric: tabular-nums;
 }
-.board-row:not([class*='podium']) .board-score { color: var(--m3-primary); }
+.board-row:not(.podium-1) .board-score { color: var(--m3-primary); }
 .board-empty {
   display: flex;
   flex-direction: column;

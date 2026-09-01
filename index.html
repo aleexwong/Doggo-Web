@@ -8,7 +8,7 @@
     <meta property="og:title" content="Doggo — Guess the Breed" />
     <meta property="og:description" content="A photo appears, you get four choices. How long can you keep the streak alive?" />
     <meta property="og:type" content="website" />
-    <meta name="theme-color" content="#f6fbf0" />
+    <meta name="theme-color" content="#fcfcfc" />
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
     <link rel="apple-touch-icon" href="/icon.svg" />
     <link rel="manifest" href="/manifest.webmanifest" />
@@ -22,7 +22,7 @@
           t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
         document.documentElement.dataset.theme = t
         document.querySelector('meta[name="theme-color"]').content =
-          t === 'dark' ? '#10140f' : '#f6fbf0'
+          t === 'dark' ? '#0f1011' : '#fcfcfc'
       } catch (e) {
         /* storage or matchMedia blocked - CSS media query still applies */
       }

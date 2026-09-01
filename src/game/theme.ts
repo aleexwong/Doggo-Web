@@ -4,7 +4,7 @@ export type Theme = 'light' | 'dark'
 
 const KEY = 'doggo.theme'
 /** Matches --m3-surface in styles.css, so the browser chrome blends in. */
-const SURFACE: Record<Theme, string> = { light: '#f6fbf0', dark: '#10140f' }
+const SURFACE: Record<Theme, string> = { light: '#fcfcfc', dark: '#0f1011' }
 
 // localStorage can throw (Safari private mode, storage disabled), so every
 // access is guarded — a blocked store just means the choice doesn't persist.

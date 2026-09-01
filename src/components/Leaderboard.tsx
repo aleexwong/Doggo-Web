@@ -85,7 +85,7 @@ export function LeaderboardScreen({
             {entries.map((e, i) => (
               <li
                 key={i}
-                className={`board-row ${i < 3 ? `podium-${i + 1}` : ''}`}
+                className={`board-row ${i === 0 ? 'podium-1' : ''}`}
                 style={{ '--i': i } as CSSProperties}
               >
                 <span className="board-rank">{i === 0 ? <TrophySketch size={18} /> : i + 1}</span>

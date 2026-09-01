@@ -4,7 +4,7 @@
   "description": "A photo appears, you get four choices. How long can you keep the streak alive?",
   "start_url": ".",
   "display": "standalone",
-  "background_color": "#10140f",
-  "theme_color": "#f6fbf0",
+  "background_color": "#0f1011",
+  "theme_color": "#fcfcfc",
   "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
 }

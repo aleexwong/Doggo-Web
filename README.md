@@ -18,11 +18,17 @@ scores live in `localStorage`.
 The UI follows **Material 3 Expressive** (the current Android look) rather than
 the flat-primary-app-bar Material of a few releases back:
 
-- Full M3 colour roles with a surface-container ramp, in a light **and** dark
-  scheme. The theme follows the system by default; the app bar carries a
-  toggle, and the choice persists in `localStorage`.
+- **Neutral surfaces, colour as signal.** The surface-container ramp is a
+  plain grey ladder; the green only appears where it means something —
+  primary actions, the correct answer, progress, the leader's row. No tint
+  wash, no glow, no blur.
+- Full M3 colour roles in a light **and** dark scheme. The theme follows the
+  system by default; the app bar carries a toggle, and the choice persists in
+  `localStorage`.
 - Surface-coloured top app bar drawn edge to edge under the status bar, tonal
   containers instead of drop shadows, and the M3 shape scale.
+- The photo *is* the card: it sizes itself and carries the radius and
+  hairline, so nothing is cropped and there are no letterbox bands to fill.
 - Expressive interaction: pill controls morph toward a squircle on press with
   a spring curve, buttons and rows carry state layers, and the leaderboard
   uses the grouped-list shape (large corners outside, tight corners inside).

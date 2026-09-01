@@ -110,13 +110,6 @@ export function GameScreen({
           <span className="question">What breed is this?</span>
         </div>
         <div className={`dog-card ${imgLoaded ? 'loaded' : ''}`}>
-          {/* Blurred copy of the same photo behind the contained image, so the
-              letterbox bars carry the photo's own colour. */}
-          <span
-            className="dog-ambient"
-            style={{ backgroundImage: imgSrc ? `url("${imgSrc}")` : undefined }}
-            aria-hidden="true"
-          />
           <img
             src={imgSrc}
             onError={onImgError}
