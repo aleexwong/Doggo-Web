@@ -4,14 +4,34 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Doggo — Guess the Breed</title>
-    <meta name="description" content="A photo appears, you get four choices. How long can you keep the streak alive? Free dog breed guessing game — no sign-in." />
+    <meta name="description" content="A photo appears and you choose from four dog breeds. How many can you get right in a row? A free guessing game — no account needed." />
     <meta property="og:title" content="Doggo — Guess the Breed" />
-    <meta property="og:description" content="A photo appears, you get four choices. How long can you keep the streak alive?" />
+    <meta property="og:description" content="A photo appears and you choose from four dog breeds. How many can you get right in a row?" />
     <meta property="og:type" content="website" />
-    <meta name="theme-color" content="#3e6837" />
+    <meta name="theme-color" content="#0f1011" />
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
     <link rel="apple-touch-icon" href="/icon.svg" />
     <link rel="manifest" href="/manifest.webmanifest" />
+    <script>
+      // Apply the stored/system theme before first paint so the app never
+      // flashes the wrong one. This has to run before the bundle, so it
+      // repeats three things it cannot import: the --m3-surface colours (see
+      // the SURFACE map in src/game/theme.ts), DEFAULT_FRAME and
+      // framePrefersDark (src/game/layout.ts). Keep them in step.
+      try {
+        var t = localStorage.getItem('doggo.theme')
+        var asked = (location.search.match(/[?&]frame=([a-z]+)/i) || [, ''])[1].toLowerCase()
+        // No ?frame= means DEFAULT_FRAME, which is the CRT, which wants dark.
+        var crt = asked === '' || asked === 'arcade' || asked === 'crt'
+        if (t !== 'light' && t !== 'dark')
+          t = crt || matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+        document.documentElement.dataset.theme = t
+        document.querySelector('meta[name="theme-color"]').content =
+          t === 'dark' ? '#0f1011' : '#fcfcfc'
+      } catch (e) {
+        /* storage or matchMedia blocked - CSS media query still applies */
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

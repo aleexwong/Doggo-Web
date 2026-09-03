@@ -8,34 +8,173 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
+/* ============================================================
+   Material 3 Expressive tokens
+   Colour roles come in a full light/dark pair so the app can flip
+   themes the way a current Android app does, rather than shipping a
+   single baked-in light scheme.
+   ============================================================ */
+
 :root {
-  --bg: #0f1115;
-  --bezel: #16181d;
-  /* Material 3 - green "doggo" scheme */
-  --md-primary: #3e6837;
-  --md-on-primary: #ffffff;
-  --md-primary-container: #bff0b0;
-  --md-on-primary-container: #002200;
-  --md-secondary-container: #dde6d5;
-  --md-surface: #f7fbf1;
-  --md-surface-container: #ebefe5;
-  --md-surface-container-high: #e6e9e0;
-  --md-on-surface: #191d17;
-  --md-on-surface-variant: #43483e;
-  --md-outline: #c3c8bc;
-  --md-error: #ba1a1a;
-  --md-error-container: #ffdad6;
+  color-scheme: light;
+
+  /* Hue is a signal, not a wash: the surface ramp is neutral and the green
+     only appears where it means something (primary actions, correct
+     answers, progress). */
+  --m3-primary: #2c6b34;
+  --m3-on-primary: #ffffff;
+  --m3-primary-container: #cdeec8;
+  --m3-on-primary-container: #06210a;
+  --m3-secondary: #4a5a4a;
+  --m3-on-secondary: #ffffff;
+  --m3-secondary-container: #e6e6e7;
+  --m3-on-secondary-container: #191a1c;
+  --m3-tertiary: #8a5100;
+  --m3-on-tertiary: #ffffff;
+  --m3-tertiary-container: #ffdfb8;
+  --m3-on-tertiary-container: #2b1600;
+  --m3-error: #b3261e;
+  --m3-on-error: #ffffff;
+  --m3-error-container: #f9dedc;
+  --m3-on-error-container: #410e0b;
+
+  --m3-surface: #fcfcfc;
+  --m3-surface-container-lowest: #ffffff;
+  --m3-surface-container-low: #f6f6f6;
+  --m3-surface-container: #f0f0f1;
+  --m3-surface-container-high: #e9e9ea;
+  --m3-surface-container-highest: #e2e2e3;
+  --m3-on-surface: #15161a;
+  --m3-on-surface-variant: #44464a;
+  --m3-outline: #74767a;
+  --m3-outline-variant: #d5d6d9;
+  --m3-shimmer: #ffffff;
+
+  /* Desk the phone sits on */
+  --stage: #e6e6e7;
+  --stage-ink: #4c4e52;
+  --stage-link: #2c6b34;
+
+  /* Device shell. The rail itself is the same object in both themes — only
+     the shadow it casts on the desk changes. */
+  --frame-shadow: rgba(0, 0, 0, 0.32);
+
+  /* Shape scale */
+  --r-xs: 6px;
+  --r-s: 10px;
+  --r-m: 14px;
+  --r-l: 20px;
+  --r-xl: 28px;
+  --r-2xl: 34px;
+  --r-full: 999px;
+
+  /* Motion — M3 emphasized easing plus a spring for press/pop */
+  --ease-emph: cubic-bezier(0.2, 0, 0, 1);
+  --ease-emph-decel: cubic-bezier(0.05, 0.7, 0.1, 1);
+  --ease-emph-accel: cubic-bezier(0.3, 0, 0.8, 0.15);
+  --spring: linear(
+    0, 0.009, 0.035 2.1%, 0.141, 0.281 6.7%, 0.723 12.9%, 0.938, 1.017,
+    1.077, 1.121, 1.149 24.3%, 1.159, 1.163, 1.161, 1.154 29.9%,
+    1.129 32.8%, 1.051 39.6%, 1.017 43.1%, 0.991, 0.977 51%, 0.974 53.8%,
+    0.98 57.1%, 0.998 69.8%, 1.005 80.7%, 1
+  );
+  --dur-1: 120ms;
+  --dur-2: 220ms;
+  --dur-3: 380ms;
+  --dur-4: 560ms;
+
   /* Frame geometry: inner radius = outer radius - bezel, keeps corners concentric */
-  --bezel-w: 9px;
-  --outer-r: 44px;
+  --bezel-w: 7px;
+  --outer-r: 54px;
   --inner-r: calc(var(--outer-r) - var(--bezel-w));
 }
 
+/* Dark scheme. It is declared twice on purpose: once for the explicit
+   in-app toggle, once for the system preference before/without a stored
+   choice. A media query and an attribute selector cannot share a rule. */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --m3-primary: #8fd28c;
+  --m3-on-primary: #04340d;
+  --m3-primary-container: #1c4d22;
+  --m3-on-primary-container: #cdeec8;
+  --m3-secondary: #b4c2b3;
+  --m3-on-secondary: #212422;
+  --m3-secondary-container: #313235;
+  --m3-on-secondary-container: #e3e3e5;
+  --m3-tertiary: #ffb951;
+  --m3-on-tertiary: #452700;
+  --m3-tertiary-container: #653c00;
+  --m3-on-tertiary-container: #ffdfb8;
+  --m3-error: #f2b8b5;
+  --m3-on-error: #601410;
+  --m3-error-container: #8c1d18;
+  --m3-on-error-container: #f9dedc;
+
+  --m3-surface: #0f1011;
+  --m3-surface-container-lowest: #0a0a0b;
+  --m3-surface-container-low: #17181a;
+  --m3-surface-container: #1b1c1e;
+  --m3-surface-container-high: #26272a;
+  --m3-surface-container-highest: #303134;
+  --m3-on-surface: #e8e9ea;
+  --m3-on-surface-variant: #c3c5c9;
+  --m3-outline: #8d8f94;
+  --m3-outline-variant: #44464a;
+  --m3-shimmer: #303134;
+
+  --stage: #08090a;
+  --stage-ink: #8b8d92;
+  --stage-link: #8fd28c;
+  --frame-shadow: rgba(0, 0, 0, 0.78);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --m3-primary: #8fd28c;
+    --m3-on-primary: #04340d;
+    --m3-primary-container: #1c4d22;
+    --m3-on-primary-container: #cdeec8;
+    --m3-secondary: #b4c2b3;
+    --m3-on-secondary: #212422;
+    --m3-secondary-container: #313235;
+    --m3-on-secondary-container: #e3e3e5;
+    --m3-tertiary: #ffb951;
+    --m3-on-tertiary: #452700;
+    --m3-tertiary-container: #653c00;
+    --m3-on-tertiary-container: #ffdfb8;
+    --m3-error: #f2b8b5;
+    --m3-on-error: #601410;
+    --m3-error-container: #8c1d18;
+    --m3-on-error-container: #f9dedc;
+
+    --m3-surface: #0f1011;
+    --m3-surface-container-lowest: #0a0a0b;
+    --m3-surface-container-low: #17181a;
+    --m3-surface-container: #1b1c1e;
+    --m3-surface-container-high: #26272a;
+    --m3-surface-container-highest: #303134;
+    --m3-on-surface: #e8e9ea;
+    --m3-on-surface-variant: #c3c5c9;
+    --m3-outline: #8d8f94;
+    --m3-outline-variant: #44464a;
+    --m3-shimmer: #303134;
+
+    --stage: #08090a;
+    --stage-ink: #8b8d92;
+    --stage-link: #8fd28c;
+    --frame-shadow: rgba(0, 0, 0, 0.78);
+  }
+}
+
 body {
-  background: var(--bg);
-  color: #e8e8e8;
-  font-family: Roboto, 'Segoe UI', system-ui, sans-serif;
+  background: var(--stage);
+  color: var(--stage-ink);
+  font-family: Roboto, 'Roboto Flex', system-ui, 'Segoe UI', sans-serif;
   min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color var(--dur-3) var(--ease-emph);
 }
 
 .page {
@@ -44,103 +183,157 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 16px;
-  padding: 24px 12px;
+  gap: 18px;
+  padding: 22px 12px;
 }
 
-.footer { font-size: 12px; color: #9aa0ab; }
-.footer a { color: #b9c6a8; }
+.footer { font-size: 12px; color: var(--stage-ink); text-align: center; }
+.footer a { color: var(--stage-link); text-decoration-color: color-mix(in srgb, var(--stage-link) 40%, transparent); }
 
 /* ---------- Phone frame ---------- */
 
 .phone {
-  width: min(380px, 94vw);
-  aspect-ratio: 9 / 19;
-  background: #050608;
-  border: 1px solid #3d424d;
+  /* the 42vh term keeps the whole device on screen on short viewports */
+  width: min(384px, 94vw, 42vh);
+  aspect-ratio: 9 / 19.5;
   border-radius: var(--outer-r);
-  padding: calc(var(--bezel-w) - 1px);
-  box-shadow:
-    0 30px 60px rgba(0, 0, 0, 0.55),
-    0 2px 6px rgba(0, 0, 0, 0.5),
-    inset 0 0 0 2.5px #24272e;
+  padding: var(--bezel-w);
   position: relative;
+  /* Only the ring around the screen is visible, so a diagonal gradient
+     across the box reads as a metal rail catching light at two corners. */
+  background: linear-gradient(
+    145deg,
+    #6b7078 0%,
+    #2a2d33 9%,
+    #101114 30%,
+    #0a0b0c 58%,
+    #24272c 84%,
+    #5e636b 100%
+  );
+  box-shadow:
+    0 0 0 0.5px rgba(0, 0, 0, 0.9),
+    0 1px 2px rgba(0, 0, 0, 0.35),
+    0 24px 44px -14px var(--frame-shadow),
+    0 56px 84px -36px var(--frame-shadow);
 }
 
-/* side buttons */
-.phone::before, .phone::after {
-  content: '';
+/* Earpiece slit, centred in the top bezel. */
+.phone-speaker {
   position: absolute;
-  right: -3px;
-  width: 3px;
-  border-radius: 2px;
-  background: #33363e;
+  top: 2.5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 14%;
+  height: 2px;
+  border-radius: 1.5px;
+  background: #0a0b0d;
+  box-shadow: inset 0 -0.5px 0 rgba(255, 255, 255, 0.12);
 }
-.phone::before { top: 22%; height: 8%; }
-.phone::after { top: 33%; height: 13%; }
+
+/* Power above the volume rocker, both on the right rail. */
+.phone-btn {
+  position: absolute;
+  right: -1.5px;
+  width: 3px;
+  border-radius: 1px 2.5px 2.5px 1px;
+  background: linear-gradient(90deg, #191c21 0%, #545a63 55%, #2b2f36 100%);
+  box-shadow: 0 0.5px 0 rgba(255, 255, 255, 0.14), 0 -0.5px 0 rgba(0, 0, 0, 0.7);
+}
+.phone-btn.power { top: 21%; height: 7.5%; }
+.phone-btn.volume { top: 31%; height: 13%; }
 
 .phone-screen {
   width: 100%;
   height: 100%;
-  background: var(--md-surface);
-  color: var(--md-on-surface);
+  background: var(--m3-surface);
+  color: var(--m3-on-surface);
   border-radius: var(--inner-r);
-  outline: 1px solid rgba(0, 0, 0, 0.9);
   overflow: hidden;
   display: flex;
   flex-direction: column;
   position: relative;
+  /* the black mask between the glass and the rail */
+  box-shadow: 0 0 0 1.5px #000;
+  transition: background-color var(--dur-3) var(--ease-emph);
 }
 
 .camera {
   position: absolute;
-  top: 12px;
+  top: 10px;
   left: 50%;
   transform: translateX(-50%);
-  width: 11px;
-  height: 11px;
+  width: 8.5px;
+  height: 8.5px;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #37507a, #05070c 55%);
-  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.85);
-  z-index: 3;
+  background: radial-gradient(circle at 32% 28%, #566d8e 0%, #15243c 36%, #04060a 74%);
+  box-shadow:
+    0 0 0 1px #000,
+    0 0 0 1.5px rgba(255, 255, 255, 0.07);
+  z-index: 4;
 }
 
-/* Status bar matches the app bar color, like a real themed Android app */
+/* Edge-to-edge status bar: it takes the app surface underneath it, the way
+   an Android 12+ app draws behind the system bars. */
 .statusbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 9px 22px 5px;
-  font-size: 12px;
-  font-weight: 500;
-  background: var(--md-primary);
-  color: var(--md-on-primary);
+  padding: 8px 20px 4px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  background: var(--m3-surface);
+  color: var(--m3-on-surface);
   z-index: 2;
+  transition: background-color var(--dur-2) var(--ease-emph), color var(--dur-2) var(--ease-emph);
 }
-.statusbar-dark { background: #101418; }
+.statusbar-dark { background: #0c0c0d; color: #e8e9ea; }
 .statusbar-icons { display: flex; gap: 5px; align-items: center; }
 
-.app-area { flex: 1; display: flex; overflow: hidden; }
+.app-area { flex: 1; display: flex; overflow: hidden; min-height: 0; }
 
-.gesturebar { padding: 7px 0 9px; display: flex; justify-content: center; background: var(--md-surface); }
-.gesturebar-dark { background: #101418; }
-.gesturebar-pill { width: 34%; height: 4px; border-radius: 4px; background: rgba(0, 0, 0, 0.35); }
-.gesturebar-dark .gesturebar-pill { background: rgba(255, 255, 255, 0.4); }
+.gesturebar {
+  padding: 7px 0 9px;
+  display: flex;
+  justify-content: center;
+  background: var(--m3-surface);
+  transition: background-color var(--dur-2) var(--ease-emph);
+}
+.gesturebar-dark { background: #0c0c0d; }
+.gesturebar-pill {
+  width: 34%;
+  height: 3.5px;
+  border-radius: var(--r-full);
+  background: color-mix(in srgb, var(--m3-on-surface) 45%, transparent);
+}
+.gesturebar-dark .gesturebar-pill { background: rgba(255, 255, 255, 0.45); }
 
 /* ---------- App bar ---------- */
 
 .app-shell { flex: 1; display: flex; flex-direction: column; min-height: 0; width: 100%; }
 
+/* M3 top app bar: surface-coloured, not a filled primary band. */
 .appbar {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 14px;
-  background: var(--md-primary);
-  color: var(--md-on-primary);
+  gap: 4px;
+  padding: 6px 8px 6px 10px;
+  min-height: 52px;
+  background: var(--m3-surface);
+  color: var(--m3-on-surface);
   z-index: 1;
 }
-.appbar-title { font-size: 19px; font-weight: 500; letter-spacing: 0.2px; flex: 1; text-align: left; display: flex; align-items: center; }
+.appbar-title {
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: 0;
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  padding-left: 4px;
+}
 
 .wordmark {
   display: inline-flex;
@@ -148,21 +341,84 @@ body {
   gap: 7px;
   font-family: Fredoka, Roboto, system-ui, sans-serif;
   font-weight: 600;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.2px;
 }
-.wordmark svg { transform: rotate(-8deg); }
-.appbar-trailing { display: flex; align-items: center; }
+.wordmark svg { color: var(--m3-primary); transform: rotate(-8deg); }
+.appbar-trailing { display: flex; align-items: center; gap: 2px; }
+
+/* ---------- Interaction: state layers + expressive press ---------- */
+
+button { font: inherit; cursor: pointer; color: inherit; }
+
+/* Every interactive surface gets an M3 state layer: a tinted overlay that
+   sits above the container colour but below the label. */
+.state-layer { position: relative; isolation: isolate; }
+.state-layer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity var(--dur-2) var(--ease-emph);
+  pointer-events: none;
+}
+.state-layer:hover:not(:disabled)::after { opacity: 0.08; }
+.state-layer:focus-visible::after { opacity: 0.1; }
+.state-layer:active:not(:disabled)::after { opacity: 0.12; }
+
+:focus-visible {
+  outline: 3px solid var(--m3-primary);
+  outline-offset: 2px;
+}
+
 .appbar-icon {
   background: none;
   border: none;
   color: inherit;
-  display: flex;
-  padding: 6px;
-  margin-left: -6px;
-  border-radius: 50%;
-  cursor: pointer;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-full);
+  transition: border-radius var(--dur-2) var(--spring), transform var(--dur-2) var(--spring);
 }
-.appbar-icon:hover { background: rgba(255, 255, 255, 0.15); }
+.appbar-icon:active { border-radius: var(--r-m); transform: scale(0.9); }
+
+/* Buttons. The pill-to-squircle morph on press is the M3 Expressive
+   signature — shape carries the feedback, not a shadow. */
+.btn-filled, .btn-tonal, .btn-text {
+  border: none;
+  border-radius: var(--r-full);
+  padding: 0 24px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.1px;
+  transition:
+    border-radius var(--dur-3) var(--spring),
+    transform var(--dur-3) var(--spring),
+    background-color var(--dur-2) var(--ease-emph);
+}
+.btn-filled { background: var(--m3-primary); color: var(--m3-on-primary); }
+.btn-tonal { background: var(--m3-secondary-container); color: var(--m3-on-secondary-container); }
+.btn-text { background: transparent; color: var(--m3-primary); padding: 0 14px; }
+.btn-filled:active, .btn-tonal:active, .btn-text:active { border-radius: var(--r-m); transform: scaleX(0.96) scaleY(0.92); }
+.btn-filled:disabled, .btn-tonal:disabled, .btn-text:disabled { opacity: 0.38; cursor: default; }
+
+/* A connected group: round outside, tight inside — M3 button groups. */
+.play-again { width: 100%; height: 52px; font-size: 16px; }
+
+.btn-group { display: flex; gap: 2px; width: 100%; }
+.btn-group > * { flex: 1; min-width: 0; padding: 0 8px; border-radius: var(--r-xs); }
+.btn-group > :first-child { border-start-start-radius: var(--r-full); border-end-start-radius: var(--r-full); }
+.btn-group > :last-child { border-start-end-radius: var(--r-full); border-end-end-radius: var(--r-full); }
+.btn-group > :active { border-radius: var(--r-xs); transform: scaleY(0.88); }
 
 /* ---------- Screens ---------- */
 
@@ -177,161 +433,269 @@ body {
   text-align: center;
   width: 100%;
   min-height: 0;
-  background: var(--md-surface);
+  background: var(--m3-surface);
+  animation: screen-in var(--dur-3) var(--ease-emph-decel) both;
+}
+@keyframes screen-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
 }
 
 .boot {
-  background: #101418;
+  background: #0c0c0d;
   color: #fff;
   cursor: pointer;
+  gap: 10px;
 }
-.boot-logo { font-size: 64px; animation: bounce 0.9s ease infinite alternate; }
-.boot-paw { color: #8fd07f; animation: bounce 0.9s ease infinite alternate; }
+.boot-paw { color: #8fd28c; animation: boot-pop 1.1s var(--spring) infinite alternate; }
 .boot-name {
+  font-family: Fredoka, Roboto, system-ui, sans-serif;
+  font-size: 36px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: #f2f3f4;
+}
+.boot-sub { font-size: 11px; color: #83858a; letter-spacing: 2.5px; text-transform: uppercase; }
+@keyframes boot-pop {
+  from { transform: translateY(4px) scale(0.94); }
+  to { transform: translateY(-10px) scale(1.04); }
+}
+
+/* ---------- Home ---------- */
+
+.home { justify-content: flex-start; padding: 8px 16px 14px; gap: 18px; }
+/* Two auto margins: the hero + cards settle in the upper middle and the
+   footnote pins to the bottom, so the screen reads full at 19.5:9. */
+.hero { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: auto; }
+
+/* Organic "expressive" container shape, slowly morphing. */
+.hero-avatar {
+  width: 104px;
+  height: 104px;
+  background: var(--m3-surface-container);
+  color: var(--m3-primary);
+  display: grid;
+  place-items: center;
+  border-radius: 46% 54% 52% 48% / 50% 46% 54% 50%;
+  animation: blob 9s ease-in-out infinite;
+}
+@keyframes blob {
+  0%, 100% { border-radius: 46% 54% 52% 48% / 50% 46% 54% 50%; transform: rotate(0deg); }
+  33% { border-radius: 56% 44% 42% 58% / 44% 56% 44% 56%; transform: rotate(4deg); }
+  66% { border-radius: 42% 58% 58% 42% / 58% 42% 58% 42%; transform: rotate(-4deg); }
+}
+
+.home h1 {
   font-family: Fredoka, Roboto, system-ui, sans-serif;
   font-size: 34px;
   font-weight: 600;
-  letter-spacing: 2px;
-  color: #a4d695;
+  line-height: 1.1;
+  letter-spacing: -0.6px;
+  color: var(--m3-on-surface);
 }
-.boot-sub { font-size: 11px; color: #7d8590; letter-spacing: 2px; }
-@keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-12px); } }
+.tagline { color: var(--m3-on-surface-variant); font-size: 14.5px; line-height: 1.35; }
 
-/* Home */
-.home { justify-content: center; padding: 20px 16px; gap: 14px; }
-.hero { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 8px; }
-.hero-avatar {
-  width: 84px;
-  height: 84px;
-  border-radius: 50%;
-  background: var(--md-primary-container);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 44px;
-}
-.home h1 { font-family: Fredoka, Roboto, system-ui, sans-serif; font-size: 26px; font-weight: 600; color: var(--md-on-surface); }
-.mode-name { font-family: Fredoka, Roboto, system-ui, sans-serif; }
-.final-score { font-family: Fredoka, Roboto, system-ui, sans-serif; }
-.tagline { color: var(--md-on-surface-variant); font-size: 14px; }
+.mode-list { width: 100%; display: flex; flex-direction: column; gap: 8px; }
 
 .mode-card {
   width: 100%;
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 16px;
+  padding: 18px 16px;
   border: none;
-  border-radius: 18px;
-  background: var(--md-surface-container);
-  color: var(--md-on-surface);
+  border-radius: var(--r-xl);
+  background: var(--m3-surface-container-high);
+  color: var(--m3-on-surface);
   cursor: pointer;
   text-align: left;
-  transition: transform 0.08s ease, background 0.15s ease;
   font: inherit;
+  /* hairline keeps the card edge legible against a near-tone surface */
+  box-shadow: inset 0 0 0 1px var(--m3-outline-variant);
+  transition:
+    border-radius var(--dur-3) var(--spring),
+    transform var(--dur-3) var(--spring),
+    background-color var(--dur-2) var(--ease-emph);
 }
-.mode-card:hover { background: var(--md-surface-container-high); }
-.mode-card:active { transform: scale(0.98); }
+.mode-card:active { border-radius: var(--r-m); transform: scale(0.975); }
+
 .mode-icon {
-  width: 46px;
-  height: 46px;
-  border-radius: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
-  background: var(--md-primary-container);
+  width: 52px;
+  height: 52px;
+  flex: none;
+  border-radius: var(--r-l);
+  display: grid;
+  place-items: center;
+  transition: border-radius var(--dur-3) var(--spring);
 }
-.blitz-icon { background: #d3e3fd; }
-.mode-text { flex: 1; display: flex; flex-direction: column; gap: 2px; }
-.mode-name { font-weight: 500; font-size: 16px; }
-.mode-desc { font-size: 13px; color: var(--md-on-surface-variant); }
+.mode-card.streak .mode-icon { background: var(--m3-primary); color: var(--m3-on-primary); }
+.mode-card.blitz .mode-icon { background: var(--m3-tertiary); color: var(--m3-on-tertiary); }
+.mode-card:active .mode-icon { border-radius: var(--r-full); }
+
+.mode-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.mode-name { font-family: Fredoka, Roboto, system-ui, sans-serif; font-weight: 600; font-size: 17px; letter-spacing: 0.1px; }
+.mode-desc { font-size: 13px; color: var(--m3-on-surface-variant); }
 .mode-best {
   font-size: 12px;
-  font-weight: 500;
-  color: var(--md-on-primary-container);
-  background: var(--md-primary-container);
+  font-weight: 700;
   padding: 4px 10px;
-  border-radius: 999px;
+  border-radius: var(--r-s);
+  background: transparent;
+  color: var(--m3-on-surface-variant);
+  box-shadow: inset 0 0 0 1px var(--m3-outline-variant);
+  white-space: nowrap;
 }
-.home-footnote { margin-top: 10px; font-size: 11px; color: var(--md-on-surface-variant); }
-.streak-icon { color: #d9542b; }
-.blitz-icon { color: #3b5fa0; }
-.error-paw { color: var(--md-outline); }
-
-/* ---------- Buttons (Material) ---------- */
-
-button { font: inherit; cursor: pointer; }
-
-.btn-filled, .btn-tonal, .btn-text {
-  border: none;
-  border-radius: 999px;
-  padding: 12px 26px;
-  font-size: 14px;
-  font-weight: 500;
-  transition: transform 0.08s ease, box-shadow 0.15s ease, filter 0.15s ease;
-}
-.btn-filled { background: var(--md-primary); color: var(--md-on-primary); }
-.btn-filled:hover { filter: brightness(1.1); }
-.btn-tonal { background: var(--md-secondary-container); color: var(--md-on-surface); }
-.btn-tonal:hover { filter: brightness(0.97); }
-.btn-text { background: transparent; color: var(--md-primary); }
-.btn-text:hover { background: rgba(62, 104, 55, 0.08); }
-.btn-filled:active, .btn-tonal:active, .btn-text:active, .answer:active { transform: scale(0.97); }
+.mode-card > svg { flex: none; color: var(--m3-on-surface-variant); }
+.home-footnote { font-size: 11px; color: var(--m3-on-surface-variant); margin-top: auto; }
 
 /* ---------- Loading / error ---------- */
 
-.paw-spinner { display: flex; color: var(--md-primary); animation: spin 1.2s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
-.error-title { font-weight: 500; font-size: 18px; }
+/* M3 Expressive loading indicator: a container that morphs through a set of
+   soft shapes while it turns, instead of a spinning ring. */
+.m3-loader { display: grid; place-items: center; animation: loader-spin 4.5s linear infinite; }
+.m3-loader-shape {
+  width: 64px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  background: var(--m3-surface-container-high);
+  color: var(--m3-primary);
+  animation: loader-morph 2.4s var(--ease-emph) infinite;
+}
+.m3-loader-shape > svg { animation: loader-spin-back 4.5s linear infinite; }
+@keyframes loader-spin { to { transform: rotate(360deg); } }
+@keyframes loader-spin-back { to { transform: rotate(-360deg); } }
+@keyframes loader-morph {
+  0%, 100% { border-radius: 44% 56% 52% 48% / 52% 44% 56% 48%; }
+  25% { border-radius: 30% 70% 62% 38% / 66% 30% 70% 34%; }
+  50% { border-radius: 62% 38% 34% 66% / 38% 62% 38% 62%; }
+  75% { border-radius: 52% 48% 70% 30% / 34% 66% 34% 66%; }
+}
+
+.error-paw { color: var(--m3-outline-variant); }
+.error-title { font-family: Fredoka, Roboto, system-ui, sans-serif; font-weight: 600; font-size: 20px; color: var(--m3-on-surface); }
 
 /* ---------- Game ---------- */
 
-.game { justify-content: flex-start; gap: 10px; padding: 12px 14px 14px; }
+.game { justify-content: flex-start; gap: 10px; padding: 4px 14px 14px; }
+
+/* Wavy progress: M3 Expressive draws the active track as a travelling
+   wave and the remaining track as a flat line with a small gap. */
+.progress-strip { padding: 2px 16px 6px; background: var(--m3-surface); }
+.wave {
+  position: relative;
+  height: 16px;
+  width: 100%;
+  --pct: 100%;
+}
+.wave-rest {
+  position: absolute;
+  left: min(calc(var(--pct) + 8px), 100%);
+  right: 0;
+  top: 6px;
+  height: 4px;
+  border-radius: var(--r-full);
+  background: var(--m3-secondary-container);
+}
+.wave-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: var(--pct);
+  background: var(--m3-primary);
+  transition: width 240ms linear, background-color var(--dur-2) var(--ease-emph);
+  --wave-img: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='16'%3E%3Cpath d='M0 8c2.75-6 8.25-6 11 0s8.25 6 11 0 8.25-6 11 0 8.25 6 11 0' fill='none' stroke='%23000' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E");
+  -webkit-mask-image: var(--wave-img);
+  mask-image: var(--wave-img);
+  -webkit-mask-repeat: repeat-x;
+  mask-repeat: repeat-x;
+  -webkit-mask-size: 44px 16px;
+  mask-size: 44px 16px;
+  animation: wave-travel 1.1s linear infinite;
+}
+@keyframes wave-travel {
+  from { -webkit-mask-position: 0 center; mask-position: 0 center; }
+  to { -webkit-mask-position: -44px center; mask-position: -44px center; }
+}
+.wave.urgent .wave-fill { background: var(--m3-error); animation-duration: 0.5s; }
+.wave.urgent .wave-rest { background: var(--m3-error-container); }
 
 .hud {
   width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 8px;
 }
-.question { font-size: 14px; color: var(--md-on-surface-variant); }
+.question { font-size: 13px; color: var(--m3-on-surface-variant); }
 
+/* M3 chips sit at a small corner radius — the pill-shaped chip is the
+   older Material look. */
 .chip {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   font-size: 13px;
-  font-weight: 500;
-  padding: 5px 12px;
-  border-radius: 999px;
-  background: var(--md-secondary-container);
-  color: var(--md-on-surface);
+  font-weight: 600;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: var(--r-s);
+  background: var(--m3-surface-container-high);
+  color: var(--m3-on-surface);
+  white-space: nowrap;
 }
-.appbar .chip { background: rgba(255, 255, 255, 0.18); color: var(--md-on-primary); }
-.score-chip svg { color: var(--md-primary); }
-.timer-chip.urgent { background: var(--md-error); color: #fff; animation: pulse 0.6s ease infinite alternate; }
-@keyframes pulse { to { transform: scale(1.12); } }
+.score-chip svg { color: var(--m3-primary); }
+.chip.timer-chip { background: var(--m3-primary-container); color: var(--m3-on-primary-container); font-variant-numeric: tabular-nums; }
+.chip.timer-chip.urgent { background: var(--m3-error); color: var(--m3-on-error); animation: pulse 0.7s var(--ease-emph) infinite alternate; }
+.timer-chip.urgent svg { color: currentColor; }
+@keyframes pulse { to { transform: scale(1.08); } }
 
 .dog-card {
   width: 100%;
   flex: 1;
   min-height: 0;
-  border-radius: 20px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-xl);
+  position: relative;
+}
+/* Only the placeholder is a card. Once the photo arrives it sizes itself
+   and becomes the card, so there is never a letterbox band to fill. */
+.dog-card:not(.loaded) {
+  border-radius: var(--r-xl);
   overflow: hidden;
-  background: linear-gradient(110deg, var(--md-surface-container) 30%, #f2f5ec 50%, var(--md-surface-container) 70%);
+  background: linear-gradient(
+    110deg,
+    var(--m3-surface-container) 30%,
+    var(--m3-shimmer) 50%,
+    var(--m3-surface-container) 70%
+  );
   background-size: 200% 100%;
   animation: shimmer 1.2s linear infinite;
 }
-.dog-card.elevated { box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15); position: relative; }
-/* Once the photo loads, stop the loading shimmer and give letterboxed
-   images (object-fit: contain) a clean solid backdrop instead. */
-.dog-card.loaded { background: var(--md-surface-container-high); animation: none; }
+.dog-card.loaded img { animation: photo-in var(--dur-3) var(--ease-emph-decel); }
+@keyframes photo-in { from { opacity: 0.4; transform: scale(0.98); } to { opacity: 1; transform: none; } }
+@keyframes shimmer { to { background-position: -200% 0; } }
+/* The whole dog is always in frame — no cropped heads or tails, which
+   matters when the dog is the thing to identify. */
+.dog-card img {
+  position: relative;
+  z-index: 1;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  display: block;
+  border-radius: var(--r-xl);
+  box-shadow: 0 0 0 1px var(--m3-outline-variant);
+}
 
 /* Streak milestone celebration: paws burst out from the photo center */
 .paw-burst {
   position: absolute;
   inset: 0;
+  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -339,9 +703,9 @@ button { font: inherit; cursor: pointer; }
 }
 .burst-paw {
   position: absolute;
-  color: #fff;
-  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.5));
-  animation: burst 0.9s ease-out forwards;
+  color: #ffffff;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.45));
+  animation: burst 0.9s var(--ease-emph-decel) forwards;
 }
 .burst-paw:nth-child(1) { --bx: -90px; --by: -60px; }
 .burst-paw:nth-child(2) { --bx: 90px; --by: -60px; animation-delay: 0.04s; }
@@ -361,8 +725,8 @@ button { font: inherit; cursor: pointer; }
   font-size: 30px;
   font-weight: 700;
   color: #fff;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
-  animation: label-pop 0.9s ease-out forwards;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.65);
+  animation: label-pop 0.9s var(--spring) forwards;
 }
 @keyframes label-pop {
   0% { transform: scale(0.5); opacity: 0; }
@@ -370,183 +734,644 @@ button { font: inherit; cursor: pointer; }
   80% { opacity: 1; }
   100% { transform: scale(1); opacity: 0; }
 }
-@keyframes shimmer { to { background-position: -200% 0; } }
-/* contain (not cover) so the whole dog is always in frame — no cropped
-   heads or tails, which matters when the dog is the thing to identify. */
-.dog-card img { width: 100%; height: 100%; object-fit: contain; display: block; }
 
 .answers {
   width: 100%;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: 6px;
 }
+/* Filled-tonal answers, no outlines: M3 uses tonal surfaces where the
+   older Material used an outlined button. */
 .answer {
-  padding: 13px 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 52px;
+  padding: 8px 10px;
   font-size: 14px;
-  font-weight: 500;
-  border-radius: 14px;
-  background: var(--md-surface-container);
-  color: var(--md-on-surface);
-  border: 1.5px solid var(--md-outline);
-  transition: transform 0.08s ease, background 0.15s ease, border-color 0.15s ease;
+  font-weight: 600;
+  border: none;
+  border-radius: var(--r-l);
+  background: var(--m3-surface-container-high);
+  color: var(--m3-on-surface);
+  transition:
+    border-radius var(--dur-3) var(--spring),
+    transform var(--dur-3) var(--spring),
+    background-color var(--dur-2) var(--ease-emph),
+    color var(--dur-2) var(--ease-emph),
+    opacity var(--dur-2) var(--ease-emph);
   /* Long two-word breed names shouldn't overflow the narrow grid cell. */
   overflow-wrap: anywhere;
   hyphens: auto;
-  line-height: 1.2;
+  line-height: 1.15;
+  animation: answer-in var(--dur-3) var(--ease-emph-decel) backwards;
+  animation-delay: calc(var(--i, 0) * 45ms);
 }
-.answer:hover:not(:disabled) { background: var(--md-surface-container-high); border-color: var(--md-primary); }
-.answer.correct { background: var(--md-primary-container); border-color: var(--md-primary); color: var(--md-on-primary-container); }
-.answer.wrong { background: var(--md-error-container); border-color: var(--md-error); animation: shake 0.3s; }
-.answer.dim { opacity: 0.45; }
+@keyframes answer-in {
+  from { opacity: 0; transform: translateY(12px) scale(0.94); }
+  to { opacity: 1; transform: none; }
+}
+.answer:active:not(:disabled) { border-radius: var(--r-xs); transform: scale(0.95); }
+.answer:disabled { cursor: default; }
+.answer.correct {
+  background: var(--m3-primary-container);
+  color: var(--m3-on-primary-container);
+  box-shadow: inset 0 0 0 1.5px var(--m3-primary);
+  animation: correct-pop var(--dur-4) var(--spring);
+}
+@keyframes correct-pop { 0% { transform: scale(1); } 35% { transform: scale(1.06); } 100% { transform: scale(1); } }
+.answer.wrong {
+  background: var(--m3-error-container);
+  color: var(--m3-on-error-container);
+  box-shadow: inset 0 0 0 1.5px var(--m3-error);
+  animation: shake 0.34s var(--ease-emph);
+}
+.answer.dim { background: var(--m3-surface-container); color: var(--m3-on-surface-variant); }
+.answer-mark { flex: none; display: grid; place-items: center; }
 @keyframes shake {
-  25% { transform: translateX(-4px); }
-  75% { transform: translateX(4px); }
+  20% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+  80% { transform: translateX(-2px); }
 }
 
 /* ---------- Game over ---------- */
 
-.gameover { justify-content: center; gap: 14px; }
+.gameover { justify-content: center; gap: 12px; padding: 8px 14px 14px; }
 .result-card {
   width: 100%;
-  background: var(--md-surface-container);
-  border-radius: 22px;
-  padding: 26px 16px;
+  background: var(--m3-surface-container-high);
+  color: var(--m3-on-surface);
+  border-radius: var(--r-2xl);
+  padding: 22px 18px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
+  animation: result-in var(--dur-4) var(--spring) both;
 }
-.final-score { font-size: 64px; font-weight: 700; color: var(--md-primary); line-height: 1; }
-.title-earned { font-weight: 500; }
-.best-line { color: var(--md-on-surface-variant); font-size: 13px; }
-.missed-line { font-size: 14px; color: var(--md-on-surface-variant); }
-.new-best {
-  color: var(--md-on-primary-container) !important;
-  background: var(--md-primary-container);
-  padding: 4px 12px;
-  border-radius: 999px;
-  font-weight: 600;
+@keyframes result-in {
+  from { opacity: 0; transform: scale(0.86); }
+  to { opacity: 1; transform: none; }
 }
-.missed-line strong { color: var(--md-on-surface); }
-.row { display: flex; gap: 6px; align-items: center; }
-.row button { white-space: nowrap; padding-left: 16px; padding-right: 16px; }
-
-/* ---------- Leaderboard ---------- */
-
-.board { justify-content: flex-start; padding: 18px 16px; gap: 14px; }
-.board-title {
+.final-score {
   font-family: Fredoka, Roboto, system-ui, sans-serif;
-  font-size: 24px;
+  font-size: 68px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -2px;
+  font-variant-numeric: tabular-nums;
+  color: var(--m3-primary);
+}
+.result-card .tagline { font-size: 13px; }
+.title-earned {
+  font-family: Fredoka, Roboto, system-ui, sans-serif;
   font-weight: 600;
+  font-size: 17px;
+  margin-top: 6px;
+}
+.best-line { font-size: 12.5px; color: var(--m3-on-surface-variant); }
+.missed-line { font-size: 13px; color: var(--m3-on-surface-variant); margin-top: 2px; }
+.missed-line strong { font-weight: 700; }
+.new-best {
+  background: var(--m3-tertiary);
+  color: var(--m3-on-tertiary);
+  padding: 4px 12px;
+  border-radius: var(--r-s);
+  font-weight: 700;
+  font-size: 12.5px;
+}
+
+/* ============================================================
+   Leaderboard — arcade cabinet
+   The one screen that steps outside the Material theme: a classic
+   high-score table, always dark, in a fixed arcade palette. Nothing
+   here reads an --m3-* token, so it looks the same in either theme.
+   ============================================================ */
+
+.arcade {
+  --a-bg: #0a0a12;
+  --a-yellow: #ffd93b;
+  --a-cyan: #4de6ff;
+  --a-pink: #ff9ecb;
+  --a-dim: #8b8ba8;
+  --a-ink: #e8e8f4;
+  --a-rule: rgba(255, 255, 255, 0.16);
+  --font-arcade: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+
+  position: relative;
+  background: var(--a-bg);
+  font-family: var(--font-arcade);
+  color: var(--a-ink);
+}
+
+/* CRT: scanlines plus the darkening at the edge of the tube */
+.arcade::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background: repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.14) 0 1px, transparent 1px 4px);
+  box-shadow: inset 0 0 70px rgba(0, 0, 0, 0.75);
+}
+
+.arcade .appbar { background: transparent; color: var(--a-dim); }
+.arcade .screen { background: transparent; }
+.arcade .wordmark {
+  font-family: var(--font-arcade);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--a-yellow);
+}
+.arcade .wordmark svg { color: var(--a-yellow); }
+
+.blink { animation: blink 1.05s linear infinite; }
+@keyframes blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+
+/* Two-frame chomp, stacked in one grid cell */
+.pac { display: inline-grid; line-height: 0; }
+.pac > * { grid-area: 1 / 1; }
+/* Both frames animate in antiphase — otherwise the closed circle sits
+   under the open mouth and the chomp never shows. */
+.pac > :first-child { animation: blink 0.42s linear infinite; }
+.pac > :last-child { animation: chomp 0.42s linear infinite; }
+@keyframes chomp { 0%, 49% { opacity: 0; } 50%, 100% { opacity: 1; } }
+
+.board { justify-content: flex-start; padding: 0 14px 10px; gap: 10px; }
+
+/* The cabinet's top strip */
+.arcade-top {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  color: var(--a-cyan);
+}
+.arcade-top b { color: var(--a-ink); font-weight: 700; }
+
+.board-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 2px 0 2px;
+  font-family: var(--font-arcade);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--a-yellow);
+  text-shadow: 0 0 14px rgba(255, 217, 59, 0.4);
+}
+
+/* Mode picker as an arcade menu, not a Material segmented button */
+.segmented {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+  border: none;
+  border-radius: 0;
+  background: none;
+  overflow: visible;
+}
+.seg {
+  flex: 0 1 auto;
+  height: 30px;
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  border-radius: 0;
+  background: none;
+  font-family: var(--font-arcade);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--a-dim);
+  transition: color var(--dur-2) var(--ease-emph);
+}
+.seg + .seg { border-left: none; }
+.seg.active { background: none; color: var(--a-yellow); }
+.seg-check { width: 0; overflow: hidden; line-height: 0; transition: width var(--dur-2) var(--ease-emph); }
+.seg.active .seg-check { width: 12px; }
+
+/* High-score table */
+.board-list {
+  list-style: none;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow-y: auto;
+}
+.board-head, .board-row {
   display: flex;
   align-items: center;
   gap: 8px;
-}
-.board-title svg { color: var(--md-primary); }
-
-.segmented {
-  display: flex;
-  width: 100%;
-  border: 1.5px solid var(--md-outline);
-  border-radius: 999px;
-  overflow: hidden;
-  background: var(--md-surface);
-}
-.seg {
-  flex: 1;
-  border: none;
-  background: transparent;
-  padding: 9px 0;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--md-on-surface-variant);
-  transition: background 0.15s ease, color 0.15s ease;
-}
-.seg.active { background: var(--md-secondary-container); color: var(--md-on-surface); font-weight: 600; }
-
-.board-list { list-style: none; width: 100%; display: flex; flex-direction: column; gap: 7px; }
-.board-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: var(--md-surface-container);
-  border-radius: 14px;
-  padding: 11px 14px;
-  text-align: left;
-}
-.board-row.podium { background: var(--md-primary-container); }
-.board-row.skeleton {
-  height: 44px;
-  background: linear-gradient(110deg, var(--md-surface-container) 30%, #f2f5ec 50%, var(--md-surface-container) 70%);
-  background-size: 200% 100%;
-  animation: shimmer 1.2s linear infinite;
-}
-.board-rank {
-  width: 28px;
+  padding: 7px 4px;
+  background: none;
+  border-radius: 0;
+  font-size: 13px;
   font-weight: 700;
-  font-size: 15px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--a-ink);
 }
+.board-head {
+  font-size: 9.5px;
+  letter-spacing: 2.5px;
+  color: var(--a-dim);
+  padding-bottom: 5px;
+  margin-bottom: 2px;
+  border-bottom: 1px solid var(--a-rule);
+}
+.board-head .board-dots { background: none; }
+.board-row {
+  animation: row-in var(--dur-3) var(--ease-emph-decel) backwards;
+  animation-delay: calc(var(--i, 0) * 45ms);
+}
+@keyframes row-in { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: none; } }
+.board-row.podium-1 { color: var(--a-yellow); }
+.board-row.podium-2 { color: var(--a-cyan); }
+.board-row.podium-3 { color: var(--a-pink); }
+
+.board-rank { width: 40px; flex: none; font-size: 11.5px; opacity: 0.75; }
 .board-name {
-  flex: 1;
-  font-weight: 500;
+  flex: 0 1 auto;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.board-score { font-family: Fredoka, Roboto, system-ui, sans-serif; font-weight: 600; font-size: 17px; color: var(--md-primary); }
-.board-empty { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 36px; color: var(--md-outline); }
+/* Anonymous entries are ghosts — same table, no name to show off. */
+.board-row.anon .board-name { color: var(--a-dim); }
+.ghost-mark { flex: none; line-height: 0; color: var(--ghost, var(--a-dim)); }
 
-/* Post-score row on game over */
+/* Pellet leader, filling the gap to the score column */
+.board-dots {
+  flex: 1 1 auto;
+  min-width: 10px;
+  height: 10px;
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.24) 1.1px, transparent 1.3px);
+  background-size: 9px 100%;
+  background-repeat: repeat-x;
+  background-position: center;
+}
+
+.board-score {
+  flex: none;
+  font-family: var(--font-arcade);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  font-variant-numeric: tabular-nums;
+  color: inherit;
+}
+
+/* Loading: a line of pellets running past, as if something is eating them */
+.board-row.skeleton {
+  height: 32px;
+  background: none;
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.16) 1.6px, transparent 1.8px);
+  background-size: 15px 100%;
+  background-repeat: repeat-x;
+  background-position: center;
+  animation: pellet-run 1.1s linear infinite;
+}
+@keyframes pellet-run { to { background-position: -15px center; } }
+
+.board-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: 44px;
+  color: var(--a-dim);
+}
+.arcade .tagline {
+  font-family: var(--font-arcade);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--a-dim);
+}
+
+/* The "insert coin" line: how anyone gets onto this board. */
+.arcade-foot {
+  animation-duration: 1.45s;
+  margin-top: auto;
+  padding-top: 8px;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 2.2px;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--a-cyan);
+}
+
+/* ---------- Post-score row on game over ---------- */
+
 .post-block { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 100%; }
-.post-row { display: flex; gap: 8px; width: 100%; }
-.post-hint { font-size: 12px; color: var(--md-error); }
-.guest-link { padding: 4px 10px; font-size: 13px; color: var(--md-on-surface-variant); }
-.guest-link:disabled { opacity: 0.5; cursor: default; }
+.post-row { display: flex; gap: 6px; width: 100%; }
+.post-hint { font-size: 12px; color: var(--m3-error); }
+.guest-link { height: 32px; font-size: 13px; font-weight: 500; color: var(--m3-on-surface-variant); }
 .nick-input {
   flex: 1;
   min-width: 0;
   font: inherit;
-  font-size: 14px;
-  padding: 11px 16px;
-  border-radius: 999px;
-  border: 1.5px solid var(--md-outline);
-  background: var(--md-surface);
-  color: var(--md-on-surface);
+  font-size: 15px;
+  height: 44px;
+  padding: 0 18px;
+  border-radius: var(--r-full);
+  border: 1px solid var(--m3-outline);
+  background: transparent;
+  color: var(--m3-on-surface);
   outline: none;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition: border-color var(--dur-2) var(--ease-emph), box-shadow var(--dur-2) var(--ease-emph);
 }
-.nick-input:focus { border-color: var(--md-primary); box-shadow: 0 0 0 3px rgba(62, 104, 55, 0.15); }
-.nick-input::placeholder { color: var(--md-on-surface-variant); }
-.post-row .btn-tonal:disabled { opacity: 0.5; cursor: default; }
-.post-note { font-size: 13px; color: var(--md-on-surface-variant); }
-.post-note.posted { color: var(--md-on-surface); font-weight: 500; }
-.btn-text.inline { padding: 0 2px; font-size: 13px; font-weight: 600; }
+.nick-input:focus {
+  border-color: var(--m3-primary);
+  box-shadow: inset 0 0 0 1px var(--m3-primary);
+}
+.nick-input::placeholder { color: var(--m3-on-surface-variant); }
+.post-note { font-size: 13px; color: var(--m3-on-surface-variant); }
+.post-note.posted { color: var(--m3-on-surface); font-weight: 500; }
+.btn-text.inline { height: auto; padding: 0 2px; font-size: 13px; font-weight: 700; }
 
-/* Error-boundary fallback (rendered outside the phone frame) */
+/* ============================================================
+   CRT presentation (?frame=arcade)
+   A cabinet monitor: bezel, a tube with the bowed corners of real glass,
+   and one overlay carrying everything a photo of a CRT shows — the
+   specular bulge, scanlines, the aperture grille, the vignette where the
+   glass thickens at the edge, and a slow roll bar.
+   ============================================================ */
+
+.page-arcade {
+  /* the room the cabinet stands in — dark whatever the app theme */
+  background: radial-gradient(ellipse 70% 55% at 50% 40%, #17171d 0%, #08080a 72%);
+  --stage-ink: #6d6d78;
+  --stage-link: #8fd28c;
+}
+
+.crt {
+  /* 3:4, the way a vertical arcade monitor sits in its cabinet */
+  width: min(640px, 92vw, 62vh);
+  aspect-ratio: 3 / 4;
+  position: relative;
+}
+
+/* A phone has no height to spend holding a 3:4 box — at 390x780 that costs
+   the photo half its size. Let the tube grow into the room instead; a taller
+   portrait tube still reads as a tube. */
+@media (max-width: 620px) {
+  .crt {
+    width: 96vw;
+    height: 82vh;
+    height: min(82dvh, 760px);
+    aspect-ratio: auto;
+  }
+  .crt-bezel { padding: 3.6%; border-radius: 6% / 3.4%; }
+  .crt-tube { border-radius: 8% / 4.6%; }
+}
+
+.crt-bezel {
+  position: absolute;
+  inset: 0;
+  padding: 4.4%;
+  /* elliptical radii: the bezel follows the tube, it is not a rounded box */
+  border-radius: 5% / 3.8%;
+  background: linear-gradient(168deg, #2a2a30 0%, #141418 20%, #0c0c0f 58%, #1b1b20 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -3px 8px rgba(0, 0, 0, 0.75),
+    0 0 0 1px #000,
+    0 44px 90px -34px rgba(0, 0, 0, 0.95);
+}
+
+.crt-tube {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 7% / 5.2%;
+  overflow: hidden;
+  background: #05050a;
+  box-shadow:
+    0 0 0 2px rgba(0, 0, 0, 0.9),
+    0 0 0 3px rgba(255, 255, 255, 0.05),
+    0 0 26px rgba(130, 170, 255, 0.06);
+}
+
+.crt-screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--m3-surface);
+  color: var(--m3-on-surface);
+  transition: background-color var(--dur-3) var(--ease-emph);
+}
+
+.crt-glass {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: inherit;
+  background:
+    /* the giveaway that the glass bulges: a specular blob, upper left */
+    radial-gradient(ellipse 55% 38% at 26% 15%, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0) 62%),
+    /* the weaker bounce off the opposite curve */
+    radial-gradient(ellipse 46% 30% at 78% 88%, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0) 66%),
+    repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.2) 0 1px, transparent 1px 3px),
+    /* aperture grille: the RGB stripe mask of a real tube */
+    repeating-linear-gradient(
+      to right,
+      rgba(255, 0, 0, 0.045) 0 1px,
+      rgba(0, 255, 0, 0.045) 1px 2px,
+      rgba(0, 90, 255, 0.045) 2px 3px
+    );
+  /* light has further to travel through the glass at the edges */
+  box-shadow:
+    inset 0 0 50px rgba(0, 0, 0, 0.5),
+    inset 0 0 150px rgba(0, 0, 0, 0.45);
+}
+
+/* Roll bar, drifting down the way an out-of-sync tube does */
+.crt-glass::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 16%;
+  background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.035), transparent);
+  animation: crt-roll 7.5s linear infinite;
+}
+@keyframes crt-roll {
+  from { top: -18%; }
+  to { top: 100%; }
+}
+
+.crt-led {
+  position: absolute;
+  bottom: 1.5%;
+  right: 8%;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #ff4b3e;
+  box-shadow: 0 0 6px rgba(255, 75, 62, 0.9), 0 0 15px rgba(255, 75, 62, 0.4);
+}
+
+/* The tube is wider than a phone, so the content still gets a column. */
+.page-arcade .appbar,
+.page-arcade .progress-strip,
+.page-arcade .screen {
+  max-width: 520px;
+  margin-inline: auto;
+  width: 100%;
+}
+
+/* The leaderboard brings its own CRT treatment; inside the tube that would
+   be two sets of scanlines over each other. */
+.page-arcade .arcade::after { display: none; }
+
+/* ============================================================
+   Frameless presentation (?frame=web)
+   The same screens without the device: full-bleed backgrounds, a content
+   column that widens with the viewport, and a real two-column game screen
+   once there is room for one.
+   ============================================================ */
+
+.page-web {
+  padding: 0;
+  gap: 0;
+  align-items: stretch;
+  justify-content: flex-start;
+  height: 100vh;
+  height: 100dvh;
+}
+
+.web-frame {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  background: var(--m3-surface);
+}
+
+/* Credits go under the frame when there is one to sit under, and onto the
+   home screen when there isn't. Both are always rendered; the frame picks. */
+.page-web > .footer { display: none; }
+.home-credits { display: none; font-size: 11px; color: var(--m3-on-surface-variant); }
+.page-web .home-credits { display: block; }
+.home-credits a { color: var(--m3-primary); }
+
+/* Content column. Backgrounds stay edge to edge; only the content is capped. */
+.page-web .appbar,
+.page-web .progress-strip,
+.page-web .screen {
+  max-width: 560px;
+  margin-inline: auto;
+  width: 100%;
+}
+.page-web .appbar { padding: 8px 16px; }
+.page-web .board { max-width: 640px; }
+
+@media (min-width: 700px) {
+  .page-web .appbar { min-height: 60px; padding: 10px 20px; }
+  .page-web .home { gap: 22px; }
+  .page-web .appbar-title { font-size: 22px; }
+  .page-web .home h1 { font-size: 40px; }
+  .page-web .hero-avatar { width: 120px; height: 120px; }
+  .page-web .screen { padding-inline: 20px; }
+}
+
+@media (min-width: 900px) {
+  .page-web .appbar,
+  .page-web .progress-strip {
+    max-width: 1140px;
+    padding-inline: 28px;
+  }
+}
+
+/* Two columns once the viewport is wide (and tall) enough to justify it:
+   photo on the left, question and answers on the right. */
+@media (min-width: 900px) and (min-height: 520px) {
+  .page-web .game {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 380px);
+    grid-template-areas:
+      'photo hud'
+      'photo answers';
+    align-content: center;
+    column-gap: 32px;
+    row-gap: 16px;
+    max-width: 1140px;
+    padding: 20px 28px 28px;
+  }
+  .page-web .game .hud {
+    grid-area: hud;
+    align-self: end;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .page-web .game .question { font-size: 19px; color: var(--m3-on-surface); }
+  .page-web .game .dog-card { grid-area: photo; height: min(68vh, 620px); }
+  .page-web .game .answers {
+    grid-area: answers;
+    align-self: start;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .page-web .game .answer { min-height: 58px; font-size: 15px; }
+}
+
+/* ---------- Error-boundary fallback (rendered outside the phone frame) ---------- */
+
 .crash {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 14px;
-  color: #9aa0ab;
+  color: var(--stage-ink);
   text-align: center;
 }
 .crash-title { font-size: 15px; }
 
 .sr-only {
   position: absolute;
-  width: 1px; height: 1px;
+  width: 1px;
+  height: 1px;
   overflow: hidden;
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .boot-logo, .boot-paw, .paw-spinner, .timer-chip.urgent, .answer.wrong, .dog-card,
-  .burst-paw, .burst-label { animation: none; }
-  .burst-paw { opacity: 0; }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  .burst-paw, .burst-label { display: none; }
+  .blink, .pac > :last-child { animation: none; opacity: 1; }
+  .crt-glass::after { display: none; }
+  .pac > :first-child { display: none; }
+  .wave-fill { -webkit-mask-position: 0 center; mask-position: 0 center; }
 }

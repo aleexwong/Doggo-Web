@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useReducer, useState } from 'react'
 import { LeaderboardScreen } from './components/Leaderboard'
 import { PhoneFrame } from './components/PhoneFrame'
+import { WebFrame } from './components/WebFrame'
+import { ArcadeFrame } from './components/ArcadeFrame'
 import { GameScreen } from './components/GameScreen'
 import {
   BootScreen,
@@ -10,6 +12,8 @@ import {
   GameOverScreen,
 } from './components/screens'
 import { initialState, reducer, Mode } from './game/state'
+import { useTheme } from './game/theme'
+import { framePrefersDark, initialFrame } from './game/layout'
 import { Breed, fetchBreeds } from './game/api'
 import { buildRound } from './game/rounds'
 
@@ -19,6 +23,10 @@ export default function App() {
   const [state, dispatch] = useReducer(reducer, undefined, initialState)
   const [breeds, setBreeds] = useState<Breed[] | null>(null)
   const [showBoard, setShowBoard] = useState(false)
+  // Presentation is fixed for the session: ?frame=web drops the device,
+  // ?frame=arcade puts it behind CRT glass.
+  const [frame] = useState(initialFrame)
+  const [theme, toggleTheme] = useTheme(framePrefersDark(frame))
 
   useEffect(() => {
     fetchBreeds().then(setBreeds)
@@ -68,40 +76,51 @@ export default function App() {
 
   const onAnswer = useCallback((path: string) => dispatch({ type: 'ANSWER', path }), [])
 
+  const screens = (
+    <>
+      {showBoard ? (
+        <LeaderboardScreen initialMode={state.mode} onBack={() => setShowBoard(false)} />
+      ) : (
+        <>
+          {state.phase === 'boot' && <BootScreen onDone={() => dispatch({ type: 'BOOTED' })} />}
+          {state.phase === 'home' && (
+            <HomeScreen
+              bestStreak={state.bestStreak}
+              bestBlitz={state.bestBlitz}
+              theme={theme}
+              onToggleTheme={toggleTheme}
+              onStart={start}
+              onBoard={() => setShowBoard(true)}
+            />
+          )}
+          {state.phase === 'loading' && <LoadingScreen />}
+          {(state.phase === 'playing' || state.phase === 'reveal') && (
+            <GameScreen state={state} onAnswer={onAnswer} onQuit={() => dispatch({ type: 'HOME' })} />
+          )}
+          {state.phase === 'gameover' && (
+            <GameOverScreen
+              state={state}
+              onPlayAgain={() => start(state.mode)}
+              onHome={() => dispatch({ type: 'HOME' })}
+              onBoard={() => setShowBoard(true)}
+            />
+          )}
+          {state.phase === 'error' && (
+            <ErrorScreen onRetry={() => start(state.mode)} onHome={() => dispatch({ type: 'HOME' })} />
+          )}
+        </>
+      )}
+    </>
+  )
+
   return (
-    <div className="page">
-      <PhoneFrame dark={state.phase === 'boot'}>
-        {showBoard ? (
-          <LeaderboardScreen initialMode={state.mode} onBack={() => setShowBoard(false)} />
-        ) : (
-          <>
-            {state.phase === 'boot' && <BootScreen onDone={() => dispatch({ type: 'BOOTED' })} />}
-            {state.phase === 'home' && (
-              <HomeScreen
-                bestStreak={state.bestStreak}
-                bestBlitz={state.bestBlitz}
-                onStart={start}
-                onBoard={() => setShowBoard(true)}
-              />
-            )}
-            {state.phase === 'loading' && <LoadingScreen />}
-            {(state.phase === 'playing' || state.phase === 'reveal') && (
-              <GameScreen state={state} onAnswer={onAnswer} onQuit={() => dispatch({ type: 'HOME' })} />
-            )}
-            {state.phase === 'gameover' && (
-              <GameOverScreen
-                state={state}
-                onPlayAgain={() => start(state.mode)}
-                onHome={() => dispatch({ type: 'HOME' })}
-                onBoard={() => setShowBoard(true)}
-              />
-            )}
-            {state.phase === 'error' && (
-              <ErrorScreen onRetry={() => start(state.mode)} onHome={() => dispatch({ type: 'HOME' })} />
-            )}
-          </>
-        )}
-      </PhoneFrame>
+    <div className={`page page-${frame}`}>
+      {frame === 'web' && <WebFrame>{screens}</WebFrame>}
+      {frame === 'arcade' && <ArcadeFrame>{screens}</ArcadeFrame>}
+      {frame === 'phone' && (
+        // The arcade leaderboard runs dark, so the system bars follow it.
+        <PhoneFrame dark={state.phase === 'boot' || showBoard}>{screens}</PhoneFrame>
+      )}
       <p className="footer">
         A web remake of the{' '}
         <a href="https://github.com/aleexwong/Doggo" target="_blank" rel="noreferrer">

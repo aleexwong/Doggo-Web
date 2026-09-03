@@ -6,12 +6,109 @@ on a personal site via iframe.
 
 ## Play
 
-- **Endless Streak** — play until you miss.
-- **60s Blitz** — identify as many breeds as you can in a minute.
+- **Endless Streak** — one mistake ends the game.
+- **60s Blitz** — answer as many as you can in a minute.
 - Keyboard: press <kbd>1</kbd>–<kbd>4</kbd> to answer.
 
 Photos from the free [Dog.CEO API](https://dog.ceo/dog-api/). No auth — best
 scores live in `localStorage`.
+
+## Three presentations
+
+One build ships all three, chosen by a query string:
+
+| URL | What you get |
+| --- | --- |
+| `/` or `?frame=arcade` | The screens behind the bulging glass of a CRT arcade monitor (**default**) |
+| `?frame=phone` | The screens inside a drawn Android device |
+| `?frame=web` | The same screens filling the browser, laid out responsively |
+
+The **CRT** is a vertical cabinet monitor: a bezel, a tube whose corners bow
+the way real glass does, and one overlay carrying what a photograph of a CRT
+shows — the specular highlight where the glass bulges, scanlines, the RGB
+aperture grille, the vignette where light travels further through thicker
+glass at the edge, a slow roll bar, and a power LED. It defaults to the dark
+theme, since a bright picture on a tube looks wrong, but a theme the player
+has actually chosen still wins. Below 620px the tube stops holding 3:4 and
+grows into the available height — on a phone a fixed 3:4 box costs the photo
+half its area, and a taller portrait tube still reads as one. The
+leaderboard's own CRT treatment switches off inside the tube rather than
+stacking two sets of scanlines.
+
+The **frameless** version is a real web layout, not a stretched phone column:
+a full-width header over a centred content column, and at ≥900px (given the
+height for it) the game screen splits in two — photo on the left, question and
+answers stacked on the right, one answer per row. The arcade leaderboard goes
+edge to edge and reads like an attract screen.
+
+Credits sit under the frame where there is one to sit under, and on the home
+screen where there isn't.
+
+To swap which you get without a query string, change `DEFAULT_FRAME` in
+[`src/game/layout.ts`](src/game/layout.ts) — that one constant is the whole
+switch. The pre-paint theme script in `index.html` has to assume the same
+default; its comment says so.
+
+## Design
+
+The UI follows **Material 3 Expressive** (the current Android look) rather than
+the flat-primary-app-bar Material of a few releases back:
+
+- **Neutral surfaces, colour as signal.** The surface-container ramp is a
+  plain grey ladder; the green only appears where it means something —
+  primary actions, the correct answer, progress, the leader's row. No tint
+  wash, no glow, no blur.
+- Full M3 colour roles in a light **and** dark scheme. The theme follows the
+  system by default; the app bar carries a toggle, and the choice persists in
+  `localStorage`.
+- Surface-coloured top app bar drawn edge to edge under the status bar, tonal
+  containers instead of drop shadows, and the M3 shape scale.
+- The photo *is* the card: it sizes itself and carries the radius and
+  hairline, so nothing is cropped and there are no letterbox bands to fill.
+- Expressive interaction: pill controls morph toward a squircle on press with
+  a spring curve, buttons and rows carry state layers, and the leaderboard
+  uses the grouped-list shape (large corners outside, tight corners inside).
+- A wavy progress indicator for the blitz clock and the streak's progress to
+  its next milestone, and a shape-morphing loading indicator.
+- Everything is gated behind `prefers-reduced-motion`.
+
+### Copy
+
+In-app text is written to **CEFR B2**, so a non-native reader can play
+without hitting a wall. Puns and culture references were the main casualties:
+the rank ladder no longer says "Ruff Start", "Dog Whisperer" or "Fastest
+Snoot in the West", and error text states plainly what failed. Three names
+are kept as deliberate exceptions because they are the app's own labels and
+the surrounding icons carry the meaning: **Blitz**, **Streak**, and **Top
+Dogs**. `1UP` on the leaderboard is decoration, not instruction.
+
+### Arcade leaderboard
+
+**Top Dogs** is the one screen that steps outside the Material theme — it is a
+cabinet high-score table, always dark whatever the app theme, drawn in a fixed
+arcade palette that reads no `--m3-*` token:
+
+- `1UP` / `HIGH SCORE` strip, a two-frame chomping Pac-Man, and a caret menu
+  in place of the segmented button.
+- `RANK · NAME · SCORE` columns, ordinal ranks (`1ST`, `2ND`…), zero-padded
+  scores, and pellets as the dot leader. First three places take Pac-Man
+  yellow, Inky cyan and Pinky pink.
+- Loading is a line of pellets running past, as if something is eating them.
+- CRT scanlines and tube vignette over the whole screen; the phone's system
+  bars follow it dark.
+
+**Anonymous players** are first-class here. A player who taps *post without a
+name* gets a stable `Guest-####` handle, and the board renders those rows with
+a ghost sprite (Blinky, Pinky, Inky, Clyde by position) and a dimmed name, so
+they read as deliberate rather than broken. The blinking footer says how to
+get on the board without an account.
+
+### Device frame
+
+The phone is drawn, not an image: a diagonal gradient across the padding ring
+reads as a metal rail, with an earpiece slit in the top bezel, power above the
+volume rocker on the right, a punch-hole camera in the display, and a black
+mask between glass and rail.
 
 ## Leaderboard setup (Firebase)
 
@@ -78,12 +175,38 @@ Locally, point the suite at a pre-installed browser with
 
 ## Embed (Next.js site)
 
+The CRT is the default, and suits a block with room around it:
+
 ```html
 <iframe
   src="https://<deployed-url>"
   title="Doggo dog breed guessing game"
   loading="lazy"
   allow="clipboard-write"
+  style="width: 100%; max-width: 760px; height: 900px; border: 0"
+/>
+```
+
+The device presentation suits a narrow slot on a page:
+
+```html
+<iframe
+  src="https://<deployed-url>/?frame=phone"
+  title="Doggo dog breed guessing game"
+  loading="lazy"
+  allow="clipboard-write"
   style="width: 400px; aspect-ratio: 9 / 21; border: 0"
+/>
+```
+
+The frameless one suits a full-width block, and fills whatever box you give it:
+
+```html
+<iframe
+  src="https://<deployed-url>/?frame=web"
+  title="Doggo dog breed guessing game"
+  loading="lazy"
+  allow="clipboard-write"
+  style="width: 100%; height: 720px; border: 0"
 />
 ```

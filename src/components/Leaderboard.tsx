@@ -1,8 +1,21 @@
-import { useEffect, useState } from 'react'
+import { CSSProperties, useEffect, useState } from 'react'
 import { Mode, BLITZ_SECONDS } from '../game/state'
-import { Entry, fetchTop } from '../game/leaderboard'
+import { Entry, fetchTop, isGuestName } from '../game/leaderboard'
 import { AppBar } from './PhoneFrame'
-import { PawMark, TrophySketch, Wordmark } from './Logo'
+import { Wordmark } from './Logo'
+import { Caret, Ghost, PacMan } from './arcade'
+
+/** Blinky, Pinky, Inky, Clyde — cycled so anonymous rows stay distinct. */
+const GHOST_COLORS = ['#ff5b4a', '#ff9ecb', '#4de6ff', '#ffb457']
+
+const ordinal = (n: number) => {
+  const tail = ['TH', 'ST', 'ND', 'RD']
+  const v = n % 100
+  return `${n}${tail[(v - 20) % 10] || tail[v] || tail[0]}`
+}
+
+/** Arcade scores are zero-padded, so the column stays a solid block. */
+const padScore = (n: number) => String(n).padStart(3, '0')
 
 export function LeaderboardScreen({
   initialMode,
@@ -27,34 +40,44 @@ export function LeaderboardScreen({
     }
   }, [mode])
 
+  /** Arcade menu item: the chosen one gets a blinking caret. */
+  const seg = (value: Mode, label: string) => (
+    <button
+      role="tab"
+      aria-selected={mode === value}
+      className={`seg state-layer ${mode === value ? 'active' : ''}`}
+      onClick={() => setMode(value)}
+    >
+      <span className="seg-check"><Caret /></span>
+      {label}
+    </button>
+  )
+
+  const best = entries?.[0]?.score ?? 0
+
   return (
-    <div className="app-shell">
+    <div className="app-shell arcade">
       <AppBar title={<Wordmark />} onBack={onBack} />
       <div className="screen board">
-        <h2 className="board-title">Top Dogs <TrophySketch size={22} /></h2>
+        <div className="arcade-top">
+          <span className="blink">1UP</span>
+          <span>
+            HIGH SCORE <b>{padScore(best)}</b>
+          </span>
+        </div>
+
+        <h2 className="board-title">
+          <PacMan size={26} /> Top Dogs
+        </h2>
         <div className="segmented" role="tablist" aria-label="Leaderboard mode">
-          <button
-            role="tab"
-            aria-selected={mode === 'streak'}
-            className={mode === 'streak' ? 'seg active' : 'seg'}
-            onClick={() => setMode('streak')}
-          >
-            Streak
-          </button>
-          <button
-            role="tab"
-            aria-selected={mode === 'blitz'}
-            className={mode === 'blitz' ? 'seg active' : 'seg'}
-            onClick={() => setMode('blitz')}
-          >
-            {BLITZ_SECONDS}s Blitz
-          </button>
+          {seg('streak', 'Streak')}
+          {seg('blitz', `${BLITZ_SECONDS}s Blitz`)}
         </div>
 
         {failed && (
           <div className="board-empty">
-            <PawMark size={40} />
-            <p className="tagline">Couldn't fetch the leaderboard right now.</p>
+            <Ghost size={36} />
+            <p className="tagline">We could not load the scores.</p>
           </div>
         )}
         {!failed && entries === null && (
@@ -66,21 +89,44 @@ export function LeaderboardScreen({
         )}
         {!failed && entries !== null && entries.length === 0 && (
           <div className="board-empty">
-            <PawMark size={40} />
-            <p className="tagline">No scores yet — be the first Top Dog!</p>
+            <Ghost size={36} />
+            <p className="tagline">No scores yet. Be the first!</p>
           </div>
         )}
         {!failed && entries !== null && entries.length > 0 && (
           <ul className="board-list">
-            {entries.map((e, i) => (
-              <li key={i} className={`board-row ${i < 3 ? 'podium' : ''}`}>
-                <span className="board-rank">{i === 0 ? <TrophySketch size={18} /> : i + 1}</span>
-                <span className="board-name">{e.name}</span>
-                <span className="board-score">{e.score}</span>
-              </li>
-            ))}
+            <li className="board-head" aria-hidden="true">
+              <span className="board-rank">Rank</span>
+              <span className="board-name">Name</span>
+              <span className="board-dots" />
+              <span className="board-score">Score</span>
+            </li>
+            {entries.map((e, i) => {
+              const anon = isGuestName(e.name)
+              return (
+                <li
+                  key={i}
+                  className={`board-row ${i < 3 ? `podium-${i + 1}` : ''} ${anon ? 'anon' : ''}`}
+                  style={{ '--i': i, '--ghost': GHOST_COLORS[i % 4] } as CSSProperties}
+                >
+                  <span className="board-rank">{ordinal(i + 1)}</span>
+                  <span className="board-name">
+                    {anon && (
+                      <span className="ghost-mark">
+                        <Ghost />
+                      </span>
+                    )}
+                    {e.name}
+                  </span>
+                  <span className="board-dots" />
+                  <span className="board-score">{padScore(e.score)}</span>
+                </li>
+              )
+            })}
           </ul>
         )}
+
+        <p className="arcade-foot blink">Play as a guest — no account needed</p>
       </div>
     </div>
   )

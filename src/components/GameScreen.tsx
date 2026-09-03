@@ -1,8 +1,19 @@
-import { useEffect, useState } from 'react'
-import { GameState } from '../game/state'
+import { CSSProperties, useEffect, useState } from 'react'
+import { GameState, BLITZ_SECONDS } from '../game/state'
 import { fetchRandomImage } from '../game/api'
 import { AppBar } from './PhoneFrame'
 import { FlameSketch, PawMark, Wordmark } from './Logo'
+import { CheckIcon, CloseIcon } from './icons'
+
+/** Streak celebrations, also used to fill the progress bar in streak mode. */
+const MILESTONES = [5, 10, 25, 50]
+
+/** How far along the player is toward the next milestone, as a 0-1 fraction. */
+function milestoneProgress(streak: number): { pct: number; next: number } {
+  const next = MILESTONES.find((m) => m > streak) ?? (Math.floor(streak / 25) + 1) * 25
+  const prev = [0, ...MILESTONES].filter((m) => m <= streak).pop() ?? 0
+  return { pct: (streak - prev) / (next - prev), next }
+}
 
 export function GameScreen({
   state,
@@ -40,7 +51,7 @@ export function GameScreen({
   const milestone =
     phase === 'reveal' &&
     picked === round?.answer.path &&
-    [5, 10, 25, 50].includes(state.streak)
+    MILESTONES.includes(state.streak)
 
   // Keyboard play: 1-4 selects an answer.
   useEffect(() => {
@@ -55,18 +66,38 @@ export function GameScreen({
 
   if (!round) return null
 
-  const hudRight =
-    state.mode === 'blitz' ? (
-      <span className={`chip timer-chip ${state.timeLeft <= 10 ? 'urgent' : ''}`}>
-        {state.timeLeft}s
-      </span>
-    ) : (
-      <span className="chip">best {state.bestStreak}</span>
-    )
+  const isBlitz = state.mode === 'blitz'
+  const urgent = isBlitz && state.timeLeft <= 10
+  // Blitz counts the clock down; streak fills toward the next celebration.
+  const progress = isBlitz
+    ? state.timeLeft / BLITZ_SECONDS
+    : milestoneProgress(state.streak).pct
+  const nextMilestone = milestoneProgress(state.streak).next
+
+  const hudRight = isBlitz ? (
+    <span className={`chip timer-chip ${urgent ? 'urgent' : ''}`}>{state.timeLeft}s</span>
+  ) : (
+    <span className="chip">Best {state.bestStreak}</span>
+  )
 
   return (
     <div className="app-shell">
       <AppBar title={<Wordmark size={20} />} onBack={onQuit} trailing={hudRight} />
+      {/* M3 Expressive wavy progress: the spent part flattens out. */}
+      <div className="progress-strip">
+        <div
+          className={`wave ${urgent ? 'urgent' : ''}`}
+          style={{ '--pct': `${Math.max(0, Math.min(1, progress)) * 100}%` } as CSSProperties}
+          role="progressbar"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={Math.round(progress * 100)}
+          aria-label={isBlitz ? 'Time remaining' : `Progress to a streak of ${nextMilestone}`}
+        >
+          <span className="wave-rest" />
+          <span className="wave-fill" />
+        </div>
+      </div>
       <div className="screen game">
         <div className="hud">
           <span className="chip score-chip">
@@ -78,7 +109,7 @@ export function GameScreen({
           </span>
           <span className="question">What breed is this?</span>
         </div>
-        <div className={`dog-card elevated ${imgLoaded ? 'loaded' : ''}`}>
+        <div className={`dog-card ${imgLoaded ? 'loaded' : ''}`}>
           <img
             src={imgSrc}
             onError={onImgError}
@@ -97,20 +128,29 @@ export function GameScreen({
           )}
         </div>
         <div className="answers" role="group" aria-label="Breed choices">
-          {round.choices.map((b) => {
-            let cls = 'answer'
+          {round.choices.map((b, i) => {
+            const isAnswer = b.path === round.answer.path
+            const isPicked = b.path === picked
+            let cls = 'answer state-layer'
             if (revealing) {
-              if (b.path === round.answer.path) cls += ' correct'
-              else if (b.path === picked) cls += ' wrong'
+              if (isAnswer) cls += ' correct'
+              else if (isPicked) cls += ' wrong'
               else cls += ' dim'
             }
             return (
               <button
                 key={b.path}
                 className={cls}
+                style={{ '--i': i } as CSSProperties}
                 disabled={revealing}
                 onClick={() => onAnswer(b.path)}
               >
+                {revealing && isAnswer && (
+                  <span className="answer-mark" aria-hidden="true"><CheckIcon size={17} /></span>
+                )}
+                {revealing && isPicked && !isAnswer && (
+                  <span className="answer-mark" aria-hidden="true"><CloseIcon size={17} /></span>
+                )}
                 {b.name}
               </button>
             )

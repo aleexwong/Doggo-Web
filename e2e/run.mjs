@@ -48,7 +48,7 @@ const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PAT
 
 /** New page with dog.ceo mocked; imageDelay slows round-building.
  *  `init` runs in the page before any app code (e.g. to break localStorage). */
-async function newGamePage({ imageDelay = 0, init } = {}) {
+async function newGamePage({ imageDelay = 0, init, query = '' } = {}) {
   const page = await browser.newPage()
   if (init) await page.addInitScript(init)
   await page.route('https://dog.ceo/api/breeds/list/all', (r) =>
@@ -59,7 +59,7 @@ async function newGamePage({ imageDelay = 0, init } = {}) {
     await r.fulfill({ json: { message: `https://images.dog.ceo/${breed}.jpg`, status: 'success' } })
   })
   await page.route(/https:\/\/images\.dog\.ceo\/.*/, (r) => r.fulfill({ contentType: 'image/jpeg', body: JPEG }))
-  await page.goto(`http://localhost:${PORT}/`)
+  await page.goto(`http://localhost:${PORT}/${query}`)
   await page.waitForSelector('.mode-card', { timeout: 8000 })
   return page
 }
@@ -190,6 +190,26 @@ console.log('suite: storage resilience')
   await page.close()
 }
 
+// ---- Suite 2d: theme toggle flips and persists ----
+console.log('suite: theme')
+{
+  const page = await newGamePage()
+  // The default frame is the CRT, so this starts dark and toggles to light.
+  const before = await page.getAttribute('html', 'data-theme')
+  await page.click('.appbar-icon[aria-label^="Switch to"]')
+  const after = await page.getAttribute('html', 'data-theme')
+  const saved = await page.evaluate(() => localStorage.getItem('doggo.theme'))
+  after !== before && after === saved
+    ? ok(`theme toggles ${before} -> ${after} and persists`)
+    : fail(`theme ${before} -> ${after}, stored ${saved}`)
+  await page.reload()
+  await page.waitForSelector('.mode-card', { timeout: 8000 })
+  ;(await page.getAttribute('html', 'data-theme')) === after
+    ? ok('theme survives a reload')
+    : fail('theme reset on reload')
+  await page.close()
+}
+
 // ---- Suite 3: leaderboard against mocked Firestore ----
 console.log('suite: leaderboard')
 {
@@ -237,6 +257,39 @@ console.log('suite: leaderboard')
   await page.close()
 }
 
+// ---- Suite 3b: arcade high-score table ----
+console.log('suite: arcade board')
+{
+  const page = await newGamePage()
+  const ROWS = [['Rufus', 42], ['Guest-4821', 32], ['Nala', 7]]
+  await page.route(/https:\/\/firestore\.googleapis\.com\/.*/, (route) =>
+    route.request().url().includes(':runQuery')
+      ? route.fulfill({
+          json: ROWS.map(([name, score]) => ({
+            document: { fields: { name: { stringValue: name }, score: { integerValue: String(score) } } },
+          })),
+        })
+      : route.fulfill({ json: {} }))
+  await page.click('.appbar-icon[aria-label="Leaderboard"]')
+  await page.waitForSelector('.board-row:not(.skeleton)', { timeout: 4000 })
+
+  const ranks = await page.$$eval('.board-row', (els) => els.map((e) => e.querySelector('.board-rank').textContent))
+  ranks.join(',') === '1ST,2ND,3RD' ? ok('ranks read 1ST/2ND/3RD') : fail('ranks: ' + ranks)
+
+  const scores = await page.$$eval('.board-score', (els) => els.slice(1).map((e) => e.textContent))
+  scores.join(',') === '042,032,007' ? ok('scores zero-padded') : fail('scores: ' + scores)
+
+  // Guest handles are marked anonymous; chosen names are not.
+  const anon = await page.$$eval('.board-row.anon', (els) => els.map((e) => e.textContent))
+  anon.length === 1 && anon[0].includes('Guest-4821')
+    ? ok('guest row marked anonymous')
+    : fail('anon rows: ' + JSON.stringify(anon))
+  ;(await page.$('.board-row.anon .ghost-mark'))
+    ? ok('anonymous row carries a ghost')
+    : fail('no ghost sprite on the guest row')
+  await page.close()
+}
+
 // ---- Suite 4: profanity filter + guest posting ----
 console.log('suite: guest + profanity')
 {
@@ -273,6 +326,70 @@ console.log('suite: guest + profanity')
   const guest = store.web_leaderboard_streak[0]?.name?.stringValue
   const isGuestHandle = /^Guest-\d{4}$/.test(guest || '')
   isGuestHandle ? ok(`guest posted as ${guest}`) : fail('guest name: ' + guest)
+  await page.close()
+}
+
+// ---- Suite 5: frameless web presentation (?frame=web) ----
+console.log('suite: frameless web')
+{
+  const page = await newGamePage({ query: '?frame=web' })
+  const chrome = await page.$$eval('.phone, .statusbar, .gesturebar, .camera', (els) => els.length)
+  const framed = await page.$('.web-frame')
+  chrome === 0 && framed ? ok('device chrome is gone') : fail(`chrome nodes: ${chrome}, web-frame: ${!!framed}`)
+
+  // Credits move onto the home screen, since there is no space under a phone.
+  const credits = await page.locator('.home-credits').isVisible()
+  const pageFooter = await page.locator('.page > .footer').isVisible()
+  credits && !pageFooter ? ok('credits shown once, on the home screen') : fail(`credits ${credits}, footer ${pageFooter}`)
+
+  // Still a working game, not just a working layout.
+  await page.click('.mode-card:has-text("Endless Streak")')
+  await page.waitForSelector('.answer', { timeout: 8000 })
+  await clickAnswer(page, true)
+  await sleep(REVEAL_WAIT)
+  ;(await page.$('.answer.correct')) || (await page.$('.answer:not([disabled])'))
+    ? ok('a round plays through frameless')
+    : fail('round did not advance without the phone frame')
+  await page.close()
+}
+{
+  // The CRT is what you get with no query string.
+  const page = await newGamePage()
+  ;(await page.$('.crt-glass')) ? ok('crt is the default frame') : fail('default is not the crt')
+  await page.close()
+}
+{
+  // The device is still reachable, for embeds that ask for it.
+  const page = await newGamePage({ query: '?frame=phone' })
+  const phone = await page.$('.phone')
+  const crt = await page.$('.crt-glass')
+  phone && !crt ? ok('?frame=phone still gives the device') : fail(`phone ${!!phone}, crt ${!!crt}`)
+  await page.close()
+}
+
+// ---- Suite 6: CRT presentation (?frame=arcade) ----
+console.log('suite: crt')
+{
+  const page = await newGamePage({ query: '?frame=arcade' })
+  const glass = await page.$('.crt-glass')
+  const other = await page.$$eval('.phone, .web-frame', (els) => els.length)
+  glass && other === 0 ? ok('tube replaces the other frames') : fail(`glass ${!!glass}, others ${other}`)
+
+  // A CRT wants a dark picture, so it changes the untouched default...
+  ;(await page.getAttribute('html', 'data-theme')) === 'dark'
+    ? ok('crt defaults to the dark theme')
+    : fail('crt did not default dark')
+  await page.close()
+}
+{
+  // ...but never overrides a choice the player already made.
+  const page = await newGamePage({
+    query: '?frame=arcade',
+    init: () => localStorage.setItem('doggo.theme', 'light'),
+  })
+  ;(await page.getAttribute('html', 'data-theme')) === 'light'
+    ? ok('a stored light choice still wins inside the crt')
+    : fail('crt overrode a stored theme choice')
   await page.close()
 }
 

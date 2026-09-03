@@ -36,12 +36,17 @@ export function nameIssue(name: string): string | null {
   const n = name.trim()
   if (n.length < NAME_MIN) return `At least ${NAME_MIN} characters`
   if (n.length > NAME_MAX) return `At most ${NAME_MAX} characters`
-  if (!isClean(n)) return 'Please pick a friendlier name'
+  if (!isClean(n)) return 'Please choose a different name'
   return null
 }
 
 export function validName(name: string): boolean {
   return nameIssue(name) === null
+}
+
+/** A handle minted by `guestName` — the board marks these as anonymous. */
+export function isGuestName(name: string): boolean {
+  return /^Guest-\d{4}$/.test(name.trim())
 }
 
 // Stable per-device guest handle, so a player who doesn't want to pick a name
