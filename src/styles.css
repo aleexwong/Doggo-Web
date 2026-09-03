@@ -1133,6 +1133,20 @@ button { font: inherit; cursor: pointer; color: inherit; }
   position: relative;
 }
 
+/* A phone has no height to spend holding a 3:4 box — at 390x780 that costs
+   the photo half its size. Let the tube grow into the room instead; a taller
+   portrait tube still reads as a tube. */
+@media (max-width: 620px) {
+  .crt {
+    width: 96vw;
+    height: 82vh;
+    height: min(82dvh, 760px);
+    aspect-ratio: auto;
+  }
+  .crt-bezel { padding: 3.6%; border-radius: 6% / 3.4%; }
+  .crt-tube { border-radius: 8% / 4.6%; }
+}
+
 .crt-bezel {
   position: absolute;
   inset: 0;

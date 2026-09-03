@@ -13,35 +13,41 @@ on a personal site via iframe.
 Photos from the free [Dog.CEO API](https://dog.ceo/dog-api/). No auth — best
 scores live in `localStorage`.
 
-## Two presentations
+## Three presentations
 
 One build ships all three, chosen by a query string:
 
 | URL | What you get |
 | --- | --- |
-| `/` or `?frame=phone` | The screens inside a drawn Android device (**default**) |
+| `/` or `?frame=arcade` | The screens behind the bulging glass of a CRT arcade monitor (**default**) |
+| `?frame=phone` | The screens inside a drawn Android device |
 | `?frame=web` | The same screens filling the browser, laid out responsively |
-| `?frame=arcade` | The screens behind the bulging glass of a CRT arcade monitor |
 
-The frameless version is a real web layout, not a stretched phone column: a
-full-width header over a centred content column, and at ≥900px (given the
-height for it) the game screen splits in two — photo on the left, question and
-answers stacked on the right, one answer per row. The arcade leaderboard goes
-edge to edge and reads like an attract screen. Credits sit under the phone
-when there is one, and on the home screen when there isn't.
-
-The CRT is a 3:4 vertical cabinet monitor: a bezel, a tube whose corners bow
+The **CRT** is a vertical cabinet monitor: a bezel, a tube whose corners bow
 the way real glass does, and one overlay carrying what a photograph of a CRT
 shows — the specular highlight where the glass bulges, scanlines, the RGB
 aperture grille, the vignette where light travels further through thicker
 glass at the edge, a slow roll bar, and a power LED. It defaults to the dark
 theme, since a bright picture on a tube looks wrong, but a theme the player
-has actually chosen still wins. The leaderboard's own CRT treatment switches
-off inside the tube rather than stacking two sets of scanlines.
+has actually chosen still wins. Below 620px the tube stops holding 3:4 and
+grows into the available height — on a phone a fixed 3:4 box costs the photo
+half its area, and a taller portrait tube still reads as one. The
+leaderboard's own CRT treatment switches off inside the tube rather than
+stacking two sets of scanlines.
+
+The **frameless** version is a real web layout, not a stretched phone column:
+a full-width header over a centred content column, and at ≥900px (given the
+height for it) the game screen splits in two — photo on the left, question and
+answers stacked on the right, one answer per row. The arcade leaderboard goes
+edge to edge and reads like an attract screen.
+
+Credits sit under the frame where there is one to sit under, and on the home
+screen where there isn't.
 
 To swap which you get without a query string, change `DEFAULT_FRAME` in
 [`src/game/layout.ts`](src/game/layout.ts) — that one constant is the whole
-switch.
+switch. The pre-paint theme script in `index.html` has to assume the same
+default; its comment says so.
 
 ## Design
 
@@ -169,7 +175,7 @@ Locally, point the suite at a pre-installed browser with
 
 ## Embed (Next.js site)
 
-The device presentation suits a narrow slot on a page:
+The CRT is the default, and suits a block with room around it:
 
 ```html
 <iframe
@@ -177,19 +183,19 @@ The device presentation suits a narrow slot on a page:
   title="Doggo dog breed guessing game"
   loading="lazy"
   allow="clipboard-write"
-  style="width: 400px; aspect-ratio: 9 / 21; border: 0"
+  style="width: 100%; max-width: 760px; height: 900px; border: 0"
 />
 ```
 
-The CRT suits a block with room around it — give it a square-ish box:
+The device presentation suits a narrow slot on a page:
 
 ```html
 <iframe
-  src="https://<deployed-url>/?frame=arcade"
+  src="https://<deployed-url>/?frame=phone"
   title="Doggo dog breed guessing game"
   loading="lazy"
   allow="clipboard-write"
-  style="width: 100%; max-width: 760px; height: 900px; border: 0"
+  style="width: 400px; aspect-ratio: 9 / 21; border: 0"
 />
 ```
 

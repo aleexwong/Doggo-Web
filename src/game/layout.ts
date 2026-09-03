@@ -11,7 +11,9 @@
  */
 export type Frame = 'phone' | 'web' | 'arcade'
 
-export const DEFAULT_FRAME: Frame = 'phone'
+/** Changing this also changes what the pre-paint script in index.html has
+ *  to assume — see the comment there. */
+export const DEFAULT_FRAME: Frame = 'arcade'
 
 export function initialFrame(): Frame {
   try {

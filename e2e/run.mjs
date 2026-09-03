@@ -194,6 +194,7 @@ console.log('suite: storage resilience')
 console.log('suite: theme')
 {
   const page = await newGamePage()
+  // The default frame is the CRT, so this starts dark and toggles to light.
   const before = await page.getAttribute('html', 'data-theme')
   await page.click('.appbar-icon[aria-label^="Switch to"]')
   const after = await page.getAttribute('html', 'data-theme')
@@ -352,9 +353,17 @@ console.log('suite: frameless web')
   await page.close()
 }
 {
-  // The default presentation keeps the device, so existing embeds don't move.
+  // The CRT is what you get with no query string.
   const page = await newGamePage()
-  ;(await page.$('.phone')) ? ok('phone frame is still the default') : fail('default lost the phone frame')
+  ;(await page.$('.crt-glass')) ? ok('crt is the default frame') : fail('default is not the crt')
+  await page.close()
+}
+{
+  // The device is still reachable, for embeds that ask for it.
+  const page = await newGamePage({ query: '?frame=phone' })
+  const phone = await page.$('.phone')
+  const crt = await page.$('.crt-glass')
+  phone && !crt ? ok('?frame=phone still gives the device') : fail(`phone ${!!phone}, crt ${!!crt}`)
   await page.close()
 }
 
