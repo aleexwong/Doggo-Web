@@ -13,11 +13,16 @@ concurrency:
 permissions:
   contents: read
 
+# Every job carries a timeout. Without one a hung job runs to the 6-hour
+# default before anyone notices, and the numbers below are set against what
+# these jobs actually take (roughly 20s, 95s and 15s) — loose enough to absorb
+# a slow runner or a cold cache, tight enough that a hang is caught in minutes.
 jobs:
   # Everything that runs in seconds, so a broken PR says so quickly.
   check:
     name: Lint, types and unit tests
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -37,6 +42,9 @@ jobs:
   e2e:
     name: End-to-end
     runs-on: ubuntu-latest
+    # The browser suite is the one that can genuinely hang: a page that never
+    # settles waits on Playwright's own timeouts, not on a crash.
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -57,6 +65,7 @@ jobs:
   audit:
     name: Dependency audit
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
