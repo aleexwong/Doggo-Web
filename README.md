@@ -166,8 +166,20 @@ blocks requests that don't originate from your app with no code changes.
 npm install
 npm run dev      # local dev server
 npm run build    # typecheck + production build (dist/)
+npm test         # unit tests — pure logic, no browser, under a second
 npm run test:e2e # headless-browser suite with Dog.CEO and Firestore mocked
 ```
+
+### Tests
+
+Two layers, because they catch different things:
+
+- **Unit** (`test/`, `node --test` via [tsx](https://tsx.is)) covers the pure
+  logic the e2e suite can only reach indirectly: every branch of the game
+  reducer, breed-name formatting, distractor choice, the profanity filter and
+  the leaderboard name rules. No build, no browser, no network.
+- **E2E** (`e2e/run.mjs`, Playwright) drives the real app in headless Chromium
+  with Dog.CEO and Firestore mocked at the network layer.
 
 CI (GitHub Actions) runs the build and the e2e suite on every push and PR.
 Locally, point the suite at a pre-installed browser with

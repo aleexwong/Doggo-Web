@@ -25,7 +25,7 @@ const parentOf = (path: string) => path.split('/')[0]
 
 /** Three distractors, preferring different parent breeds so a round isn't
  *  decided between near-identical siblings (e.g. two retriever sub-breeds). */
-function pickDistractors(breeds: Breed[], answer: Breed): Breed[] {
+export function pickDistractors(breeds: Breed[], answer: Breed): Breed[] {
   const pool = breeds.filter((b) => b.path !== answer.path)
   const answerParent = parentOf(answer.path)
   const different = shuffle(pool.filter((b) => parentOf(b.path) !== answerParent))

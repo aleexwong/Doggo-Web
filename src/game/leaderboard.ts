@@ -7,12 +7,16 @@ import { isClean } from './profanity'
 // Firestore security rules — but they're kept out of source on principle.
 // When unset, the leaderboard UI hides itself and the game works fully
 // offline-first with localStorage bests.
-const PROJECT_ID = import.meta.env.VITE_FB_PROJECT_ID as string | undefined
-const API_KEY = import.meta.env.VITE_FB_API_KEY as string | undefined
+// Vite replaces `import.meta.env` at build time; under the plain Node test
+// runner it doesn't exist at all, so fall back to an empty config there — the
+// unit tests only exercise the pure name helpers below.
+const env = (import.meta.env ?? {}) as Partial<ImportMetaEnv>
+const PROJECT_ID = env.VITE_FB_PROJECT_ID as string | undefined
+const API_KEY = env.VITE_FB_API_KEY as string | undefined
 // Optional: when set to the deployed Cloud Function URL, score posts go
 // through the server-side validator (real enforcement) instead of writing to
 // Firestore directly. Reads always stay direct.
-const WRITE_URL = import.meta.env.VITE_LEADERBOARD_WRITE_URL as string | undefined
+const WRITE_URL = env.VITE_LEADERBOARD_WRITE_URL as string | undefined
 
 export const leaderboardEnabled = Boolean(PROJECT_ID && API_KEY)
 
