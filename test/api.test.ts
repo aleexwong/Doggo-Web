@@ -87,7 +87,10 @@ test('falls back to the bundled list instead of leaving the grid empty', async (
   for (const [why, handler] of cases) {
     const breeds = await withFetch(handler, fetchBreeds)
     assert.ok(breeds.length >= 4, `${why}: expected the fallback list`)
-    assert.ok(breeds.some((x) => x.path === 'pug'), `${why}: expected the fallback list`)
+    assert.ok(
+      breeds.some((x) => x.path === 'pug'),
+      `${why}: expected the fallback list`,
+    )
   }
 })
 
@@ -104,7 +107,11 @@ test('fetchRandomImage returns the photo URL', async () => {
 
 test('fetchRandomImage throws on an error response, so the round can retry', async () => {
   await assert.rejects(
-    () => withFetch(() => ({ ok: false, status: 404 }), () => fetchRandomImage({ path: 'pug', name: 'Pug' })),
+    () =>
+      withFetch(
+        () => ({ ok: false, status: 404 }),
+        () => fetchRandomImage({ path: 'pug', name: 'Pug' }),
+      ),
     /404/,
   )
 })

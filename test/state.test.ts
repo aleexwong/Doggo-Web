@@ -78,12 +78,18 @@ test('a correct answer scores, extends the streak, and reveals', () => {
 })
 
 test('a wrong answer ends a streak run but not a blitz run', () => {
-  const streak = reducer(at({ mode: 'streak', score: 3, streak: 3 }), { type: 'ANSWER', path: 'husky' })
+  const streak = reducer(at({ mode: 'streak', score: 3, streak: 3 }), {
+    type: 'ANSWER',
+    path: 'husky',
+  })
   assert.equal(streak.phase, 'gameover')
   assert.equal(streak.score, 3)
   assert.equal(streak.streak, 0)
 
-  const blitz = reducer(at({ mode: 'blitz', score: 3, streak: 3 }), { type: 'ANSWER', path: 'husky' })
+  const blitz = reducer(at({ mode: 'blitz', score: 3, streak: 3 }), {
+    type: 'ANSWER',
+    path: 'husky',
+  })
   assert.equal(blitz.phase, 'reveal')
   assert.equal(blitz.score, 3)
   assert.equal(blitz.streak, 0)
@@ -109,13 +115,17 @@ test('answers outside the playing phase are ignored', () => {
 
 test('ADVANCE uses the prefetched round, or waits for one', () => {
   const next = round('husky')
-  const withNext = reducer(at({ phase: 'reveal', picked: 'pug', nextRound: next }), { type: 'ADVANCE' })
+  const withNext = reducer(at({ phase: 'reveal', picked: 'pug', nextRound: next }), {
+    type: 'ADVANCE',
+  })
   assert.equal(withNext.phase, 'playing')
   assert.equal(withNext.round, next)
   assert.equal(withNext.nextRound, null)
   assert.equal(withNext.picked, null)
 
-  const without = reducer(at({ phase: 'reveal', picked: 'pug', nextRound: null }), { type: 'ADVANCE' })
+  const without = reducer(at({ phase: 'reveal', picked: 'pug', nextRound: null }), {
+    type: 'ADVANCE',
+  })
   assert.equal(without.phase, 'loading')
   assert.equal(without.round, null)
   assert.equal(without.picked, null)

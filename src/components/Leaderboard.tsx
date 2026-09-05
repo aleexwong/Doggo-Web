@@ -30,6 +30,9 @@ export function LeaderboardScreen({
 
   useEffect(() => {
     let cancelled = false
+    // Switching mode has to clear the old board before the new one arrives,
+    // or the player sees streak scores under a blitz heading.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setEntries(null)
     setFailed(false)
     fetchTop(mode)
@@ -48,7 +51,9 @@ export function LeaderboardScreen({
       className={`seg state-layer ${mode === value ? 'active' : ''}`}
       onClick={() => setMode(value)}
     >
-      <span className="seg-check"><Caret /></span>
+      <span className="seg-check">
+        <Caret />
+      </span>
       {label}
     </button>
   )

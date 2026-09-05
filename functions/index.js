@@ -21,12 +21,14 @@ const SCORE_MAX = 10000
 const RATE_WINDOW_MS = 5000 // at most one post per IP per this window
 
 function sanitizeName(name) {
-  return String(name || '')
-    // eslint-disable-next-line no-control-regex
-    .replace(/[\u0000-\u001f\u007f]/g, '')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .slice(0, NAME_MAX)
+  return (
+    String(name || '')
+      // eslint-disable-next-line no-control-regex
+      .replace(/[\u0000-\u001f\u007f]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, NAME_MAX)
+  )
 }
 
 exports.submitScore = onRequest({ cors: true }, async (req, res) => {
@@ -57,7 +59,8 @@ exports.submitScore = onRequest({ cors: true }, async (req, res) => {
   }
 
   // Best-effort per-IP rate limit via a transactional marker doc.
-  const ip = (req.headers['x-forwarded-for'] || '').toString().split(',')[0].trim() || req.ip || 'unknown'
+  const ip =
+    (req.headers['x-forwarded-for'] || '').toString().split(',')[0].trim() || req.ip || 'unknown'
   const rlRef = db.collection('rate_limits').doc(Buffer.from(ip).toString('hex').slice(0, 128))
   try {
     await db.runTransaction(async (tx) => {

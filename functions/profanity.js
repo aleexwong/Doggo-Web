@@ -1,6 +1,7 @@
 // Server-side mirror of src/game/profanity.ts. Keep the two in sync — the
 // client filter is a UX gate; this copy is the enforced one.
 
+// prettier-ignore
 const BLOCKED = [
   'fuck', 'shit', 'bitch', 'cunt', 'asshole', 'dick', 'pussy', 'bastard',
   'slut', 'whore', 'wank', 'twat', 'prick', 'dildo', 'cock', 'boner',
@@ -8,6 +9,7 @@ const BLOCKED = [
   'coon', 'spic', 'kike', 'chink', 'tranny', 'molest', 'pedo',
 ]
 
+// prettier-ignore
 const LEET = {
   '0': 'o', '1': 'i', '3': 'e', '4': 'a', '5': 's', '7': 't',
   '8': 'b', '@': 'a', $: 's', '!': 'i', '|': 'i',

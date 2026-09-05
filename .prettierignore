@@ -1,0 +1,10 @@
+dist
+dist-e2e
+node_modules
+package-lock.json
+src/assets
+
+# Hand-authored and hand-arranged. Prettier rewrites ~70% of the stylesheet
+# for no gain, and reflows prose the author wrapped on purpose.
+*.css
+*.md

@@ -15,7 +15,7 @@ function shuffle<T>(arr: T[]): T[] {
   return a
 }
 
-const pick = <T,>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)]
+const pick = <T>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)]
 
 /**
  * Build a round: random answer breed, a random photo of it (preloaded),

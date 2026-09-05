@@ -95,7 +95,11 @@ export default function App() {
           )}
           {state.phase === 'loading' && <LoadingScreen />}
           {(state.phase === 'playing' || state.phase === 'reveal') && (
-            <GameScreen state={state} onAnswer={onAnswer} onQuit={() => dispatch({ type: 'HOME' })} />
+            <GameScreen
+              state={state}
+              onAnswer={onAnswer}
+              onQuit={() => dispatch({ type: 'HOME' })}
+            />
           )}
           {state.phase === 'gameover' && (
             <GameOverScreen
@@ -106,7 +110,10 @@ export default function App() {
             />
           )}
           {state.phase === 'error' && (
-            <ErrorScreen onRetry={() => start(state.mode)} onHome={() => dispatch({ type: 'HOME' })} />
+            <ErrorScreen
+              onRetry={() => start(state.mode)}
+              onHome={() => dispatch({ type: 'HOME' })}
+            />
           )}
         </>
       )}
@@ -126,7 +133,10 @@ export default function App() {
         <a href="https://github.com/aleexwong/Doggo" target="_blank" rel="noreferrer">
           Doggo Android app
         </a>{' '}
-        · photos by <a href="https://dog.ceo/dog-api/" target="_blank" rel="noreferrer">Dog.CEO</a>
+        · photos by{' '}
+        <a href="https://dog.ceo/dog-api/" target="_blank" rel="noreferrer">
+          Dog.CEO
+        </a>
       </p>
     </div>
   )

@@ -122,8 +122,14 @@ export function preloadImage(url: string): Promise<void> {
   return new Promise((resolve, reject) => {
     const img = new Image()
     const timer = setTimeout(() => reject(new Error('image timeout')), FETCH_TIMEOUT_MS)
-    img.onload = () => { clearTimeout(timer); resolve() }
-    img.onerror = () => { clearTimeout(timer); reject(new Error('image failed')) }
+    img.onload = () => {
+      clearTimeout(timer)
+      resolve()
+    }
+    img.onerror = () => {
+      clearTimeout(timer)
+      reject(new Error('image failed'))
+    }
     img.src = url
   })
 }

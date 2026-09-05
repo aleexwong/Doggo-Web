@@ -54,7 +54,13 @@ test('avoids siblings of the answer when the pool allows it', () => {
 test('falls back to siblings rather than returning a short list', () => {
   // Only two non-retriever breeds exist here, so one sibling has to be used
   // to fill the fourth answer slot.
-  const small = ['retriever/golden', 'retriever/flatcoated', 'retriever/chesapeake', 'pug', 'husky'].map(b)
+  const small = [
+    'retriever/golden',
+    'retriever/flatcoated',
+    'retriever/chesapeake',
+    'pug',
+    'husky',
+  ].map(b)
   const answer = b('retriever/golden')
   for (let i = 0; i < 25; i++) {
     const picked = pickDistractors(small, answer)

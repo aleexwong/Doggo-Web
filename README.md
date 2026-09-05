@@ -166,9 +166,25 @@ blocks requests that don't originate from your app with no code changes.
 npm install
 npm run dev      # local dev server
 npm run build    # typecheck + production build (dist/)
+npm run lint     # ESLint
+npm run format   # Prettier, in place (format:check to only report)
 npm test         # unit tests — pure logic, no browser, under a second
 npm run test:e2e # headless-browser suite with Dog.CEO and Firestore mocked
 ```
+
+### Lint and format
+
+Prettier owns formatting; `eslint-config-prettier` switches off every
+stylistic ESLint rule, so anything ESLint reports is a real problem rather
+than a matter of taste. Two things are deliberately left alone: the
+stylesheet and the Markdown (both hand-arranged — see `.prettierignore`), and
+the word tables in the profanity filters, which carry a `// prettier-ignore`
+so they stay readable as tables.
+
+`eslint-plugin-react-hooks` runs at full strength, including the newer
+`set-state-in-effect` rule. Two places suppress it with a comment saying
+why — resetting photo state per round, and clearing the board when the
+leaderboard mode changes.
 
 ### Tests
 

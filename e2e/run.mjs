@@ -23,16 +23,23 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
 let failures = 0
 const ok = (m) => console.log('  PASS', m)
-const fail = (m) => { console.error('  FAIL', m); failures++ }
+const fail = (m) => {
+  console.error('  FAIL', m)
+  failures++
+}
 
 console.log('building (dist-e2e, leaderboard enabled)…')
 execSync('npx vite build --outDir dist-e2e', {
   stdio: 'inherit',
   env: { ...process.env, VITE_FB_PROJECT_ID: 'e2e-project', VITE_FB_API_KEY: 'e2e-key' },
 })
-const server = spawn('npx', ['vite', 'preview', '--outDir', 'dist-e2e', '--port', String(PORT), '--strictPort'], {
-  stdio: 'ignore',
-})
+const server = spawn(
+  'npx',
+  ['vite', 'preview', '--outDir', 'dist-e2e', '--port', String(PORT), '--strictPort'],
+  {
+    stdio: 'ignore',
+  },
+)
 process.on('exit', () => server.kill())
 for (let i = 0; ; i++) {
   try {
@@ -52,13 +59,21 @@ async function newGamePage({ imageDelay = 0, init, query = '' } = {}) {
   const page = await browser.newPage()
   if (init) await page.addInitScript(init)
   await page.route('https://dog.ceo/api/breeds/list/all', (r) =>
-    r.fulfill({ json: { message: { pug: [], husky: [], beagle: [], boxer: [] }, status: 'success' } }))
+    r.fulfill({
+      json: { message: { pug: [], husky: [], beagle: [], boxer: [] }, status: 'success' },
+    }),
+  )
   await page.route(/https:\/\/dog\.ceo\/api\/breed\/(\w+)\/images\/random/, async (r) => {
     if (imageDelay) await sleep(imageDelay)
-    const breed = r.request().url().match(/breed\/(\w+)\//)[1]
+    const breed = r
+      .request()
+      .url()
+      .match(/breed\/(\w+)\//)[1]
     await r.fulfill({ json: { message: `https://images.dog.ceo/${breed}.jpg`, status: 'success' } })
   })
-  await page.route(/https:\/\/images\.dog\.ceo\/.*/, (r) => r.fulfill({ contentType: 'image/jpeg', body: JPEG }))
+  await page.route(/https:\/\/images\.dog\.ceo\/.*/, (r) =>
+    r.fulfill({ contentType: 'image/jpeg', body: JPEG }),
+  )
   await page.goto(`http://localhost:${PORT}/${query}`)
   await page.waitForSelector('.mode-card', { timeout: 8000 })
   return page
@@ -78,8 +93,10 @@ console.log('suite: streak game')
   const page = await newGamePage()
   await page.click('.mode-card:has-text("Endless Streak")')
   await page.waitForSelector('.answer', { timeout: 8000 })
-  await clickAnswer(page, true); await sleep(REVEAL_WAIT)
-  await clickAnswer(page, true); await sleep(REVEAL_WAIT)
+  await clickAnswer(page, true)
+  await sleep(REVEAL_WAIT)
+  await clickAnswer(page, true)
+  await sleep(REVEAL_WAIT)
   const missed = NAME[(await page.getAttribute('.dog-card img', 'src')).match(/([a-z]+)\.jpg/)[1]]
   await clickAnswer(page, false)
   await page.waitForSelector('.gameover', { timeout: 4000 })
@@ -104,8 +121,10 @@ console.log('suite: blitz')
   const page = await newGamePage()
   await page.click('.mode-card:has-text("Blitz")')
   await page.waitForSelector('.answer', { timeout: 8000 })
-  await clickAnswer(page, true); await sleep(REVEAL_WAIT)
-  await clickAnswer(page, true); await sleep(REVEAL_WAIT)
+  await clickAnswer(page, true)
+  await sleep(REVEAL_WAIT)
+  await clickAnswer(page, true)
+  await sleep(REVEAL_WAIT)
   const bs = await page.evaluate(() => localStorage.getItem('doggo.bestStreak'))
   bs === '0' ? ok('blitz leaves bestStreak alone') : fail(`bestStreak ${bs}, want 0`)
   await page.close()
@@ -134,10 +153,18 @@ console.log('suite: broken-image recovery')
   let n = 0
   const hits = new Map()
   await page.route('https://dog.ceo/api/breeds/list/all', (r) =>
-    r.fulfill({ json: { message: { pug: [], husky: [], beagle: [], boxer: [] }, status: 'success' } }))
+    r.fulfill({
+      json: { message: { pug: [], husky: [], beagle: [], boxer: [] }, status: 'success' },
+    }),
+  )
   await page.route(/https:\/\/dog\.ceo\/api\/breed\/(\w+)\/images\/random/, (r) => {
-    const breed = r.request().url().match(/breed\/(\w+)\//)[1]
-    r.fulfill({ json: { message: `https://images.dog.ceo/${breed}/img-${++n}.jpg`, status: 'success' } })
+    const breed = r
+      .request()
+      .url()
+      .match(/breed\/(\w+)\//)[1]
+    r.fulfill({
+      json: { message: `https://images.dog.ceo/${breed}/img-${++n}.jpg`, status: 'success' },
+    })
   })
   // Fail the SECOND request to any given URL: the preload (1st hit) succeeds so
   // the round is shown, but the visible <img> (2nd hit) 404s — exactly the
@@ -154,10 +181,13 @@ console.log('suite: broken-image recovery')
   await page.click('.mode-card:has-text("Endless Streak")')
   await page.waitForSelector('.dog-card img', { timeout: 8000 })
   await page
-    .waitForFunction(() => {
-      const img = document.querySelector('.dog-card img')
-      return img && img.complete && img.naturalWidth > 0
-    }, { timeout: 8000 })
+    .waitForFunction(
+      () => {
+        const img = document.querySelector('.dog-card img')
+        return img && img.complete && img.naturalWidth > 0
+      },
+      { timeout: 8000 },
+    )
     .then(() => ok('broken visible image self-heals'))
     .catch(() => fail('dog image stayed blank after render error'))
   await page.close()
@@ -229,15 +259,20 @@ console.log('suite: leaderboard')
     const m = url.match(/documents\/(web_leaderboard_\w+)\?/)
     if (m) {
       store[m[1]].push(body.fields)
-      return route.fulfill({ json: { name: 'projects/e2e/databases/(default)/documents/' + m[1] + '/d1' } })
+      return route.fulfill({
+        json: { name: 'projects/e2e/databases/(default)/documents/' + m[1] + '/d1' },
+      })
     }
     return route.fulfill({ status: 404, json: {} })
   })
 
-  ;(await page.$('.appbar-icon[aria-label="Leaderboard"]')) ? ok('entry point on home') : fail('no leaderboard button')
+  ;(await page.$('.appbar-icon[aria-label="Leaderboard"]'))
+    ? ok('entry point on home')
+    : fail('no leaderboard button')
   await page.click('.mode-card:has-text("Endless Streak")')
   await page.waitForSelector('.answer', { timeout: 8000 })
-  await clickAnswer(page, true); await sleep(REVEAL_WAIT)
+  await clickAnswer(page, true)
+  await sleep(REVEAL_WAIT)
   await clickAnswer(page, false)
   await page.waitForSelector('.gameover', { timeout: 4000 })
   await page.fill('.nick-input', 'TestDog')
@@ -261,19 +296,28 @@ console.log('suite: leaderboard')
 console.log('suite: arcade board')
 {
   const page = await newGamePage()
-  const ROWS = [['Rufus', 42], ['Guest-4821', 32], ['Nala', 7]]
+  const ROWS = [
+    ['Rufus', 42],
+    ['Guest-4821', 32],
+    ['Nala', 7],
+  ]
   await page.route(/https:\/\/firestore\.googleapis\.com\/.*/, (route) =>
     route.request().url().includes(':runQuery')
       ? route.fulfill({
           json: ROWS.map(([name, score]) => ({
-            document: { fields: { name: { stringValue: name }, score: { integerValue: String(score) } } },
+            document: {
+              fields: { name: { stringValue: name }, score: { integerValue: String(score) } },
+            },
           })),
         })
-      : route.fulfill({ json: {} }))
+      : route.fulfill({ json: {} }),
+  )
   await page.click('.appbar-icon[aria-label="Leaderboard"]')
   await page.waitForSelector('.board-row:not(.skeleton)', { timeout: 4000 })
 
-  const ranks = await page.$$eval('.board-row', (els) => els.map((e) => e.querySelector('.board-rank').textContent))
+  const ranks = await page.$$eval('.board-row', (els) =>
+    els.map((e) => e.querySelector('.board-rank').textContent),
+  )
   ranks.join(',') === '1ST,2ND,3RD' ? ok('ranks read 1ST/2ND/3RD') : fail('ranks: ' + ranks)
 
   const scores = await page.$$eval('.board-score', (els) => els.slice(1).map((e) => e.textContent))
@@ -308,7 +352,8 @@ console.log('suite: guest + profanity')
   })
   await page.click('.mode-card:has-text("Endless Streak")')
   await page.waitForSelector('.answer', { timeout: 8000 })
-  await clickAnswer(page, true); await sleep(REVEAL_WAIT)
+  await clickAnswer(page, true)
+  await sleep(REVEAL_WAIT)
   await clickAnswer(page, false)
   await page.waitForSelector('.gameover', { timeout: 4000 })
 
@@ -335,12 +380,16 @@ console.log('suite: frameless web')
   const page = await newGamePage({ query: '?frame=web' })
   const chrome = await page.$$eval('.phone, .statusbar, .gesturebar, .camera', (els) => els.length)
   const framed = await page.$('.web-frame')
-  chrome === 0 && framed ? ok('device chrome is gone') : fail(`chrome nodes: ${chrome}, web-frame: ${!!framed}`)
+  chrome === 0 && framed
+    ? ok('device chrome is gone')
+    : fail(`chrome nodes: ${chrome}, web-frame: ${!!framed}`)
 
   // Credits move onto the home screen, since there is no space under a phone.
   const credits = await page.locator('.home-credits').isVisible()
   const pageFooter = await page.locator('.page > .footer').isVisible()
-  credits && !pageFooter ? ok('credits shown once, on the home screen') : fail(`credits ${credits}, footer ${pageFooter}`)
+  credits && !pageFooter
+    ? ok('credits shown once, on the home screen')
+    : fail(`credits ${credits}, footer ${pageFooter}`)
 
   // Still a working game, not just a working layout.
   await page.click('.mode-card:has-text("Endless Streak")')
@@ -373,7 +422,9 @@ console.log('suite: crt')
   const page = await newGamePage({ query: '?frame=arcade' })
   const glass = await page.$('.crt-glass')
   const other = await page.$$eval('.phone, .web-frame', (els) => els.length)
-  glass && other === 0 ? ok('tube replaces the other frames') : fail(`glass ${!!glass}, others ${other}`)
+  glass && other === 0
+    ? ok('tube replaces the other frames')
+    : fail(`glass ${!!glass}, others ${other}`)
 
   // A CRT wants a dark picture, so it changes the untouched default...
   ;(await page.getAttribute('html', 'data-theme')) === 'dark'

@@ -77,11 +77,16 @@ export const SCORE_MAX = 10000
 
 /** Strip control chars, collapse whitespace, and clamp length before posting. */
 export function sanitizeName(name: string): string {
-  return name
-    .replace(/[\u0000-\u001f\u007f]/g, '')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .slice(0, NAME_MAX)
+  return (
+    name
+      // Control characters are exactly what this targets — a paste can carry
+      // them, and Firestore should never store them.
+      // eslint-disable-next-line no-control-regex
+      .replace(/[\u0000-\u001f\u007f]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, NAME_MAX)
+  )
 }
 
 export async function submitScore(mode: Mode, name: string, score: number): Promise<void> {
@@ -134,8 +139,9 @@ export async function fetchTop(mode: Mode, limit = 10): Promise<Entry[]> {
     },
   )
   if (!res.ok) throw new Error(`query failed: HTTP ${res.status}`)
-  const rows: { document?: { fields?: Record<string, { stringValue?: string; integerValue?: string }> } }[] =
-    await res.json()
+  const rows: {
+    document?: { fields?: Record<string, { stringValue?: string; integerValue?: string }> }
+  }[] = await res.json()
   const all = rows
     .filter((r) => r.document?.fields)
     .map((r) => ({
