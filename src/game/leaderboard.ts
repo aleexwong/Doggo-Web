@@ -7,12 +7,16 @@ import { isClean } from './profanity'
 // Firestore security rules — but they're kept out of source on principle.
 // When unset, the leaderboard UI hides itself and the game works fully
 // offline-first with localStorage bests.
-const PROJECT_ID = import.meta.env.VITE_FB_PROJECT_ID as string | undefined
-const API_KEY = import.meta.env.VITE_FB_API_KEY as string | undefined
+// Vite replaces `import.meta.env` at build time; under the plain Node test
+// runner it doesn't exist at all, so fall back to an empty config there — the
+// unit tests only exercise the pure name helpers below.
+const env = (import.meta.env ?? {}) as Partial<ImportMetaEnv>
+const PROJECT_ID = env.VITE_FB_PROJECT_ID as string | undefined
+const API_KEY = env.VITE_FB_API_KEY as string | undefined
 // Optional: when set to the deployed Cloud Function URL, score posts go
 // through the server-side validator (real enforcement) instead of writing to
 // Firestore directly. Reads always stay direct.
-const WRITE_URL = import.meta.env.VITE_LEADERBOARD_WRITE_URL as string | undefined
+const WRITE_URL = env.VITE_LEADERBOARD_WRITE_URL as string | undefined
 
 export const leaderboardEnabled = Boolean(PROJECT_ID && API_KEY)
 
@@ -73,11 +77,16 @@ export const SCORE_MAX = 10000
 
 /** Strip control chars, collapse whitespace, and clamp length before posting. */
 export function sanitizeName(name: string): string {
-  return name
-    .replace(/[\u0000-\u001f\u007f]/g, '')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .slice(0, NAME_MAX)
+  return (
+    name
+      // Control characters are exactly what this targets — a paste can carry
+      // them, and Firestore should never store them.
+      // eslint-disable-next-line no-control-regex
+      .replace(/[\u0000-\u001f\u007f]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, NAME_MAX)
+  )
 }
 
 export async function submitScore(mode: Mode, name: string, score: number): Promise<void> {
@@ -130,8 +139,9 @@ export async function fetchTop(mode: Mode, limit = 10): Promise<Entry[]> {
     },
   )
   if (!res.ok) throw new Error(`query failed: HTTP ${res.status}`)
-  const rows: { document?: { fields?: Record<string, { stringValue?: string; integerValue?: string }> } }[] =
-    await res.json()
+  const rows: {
+    document?: { fields?: Record<string, { stringValue?: string; integerValue?: string }> }
+  }[] = await res.json()
   const all = rows
     .filter((r) => r.document?.fields)
     .map((r) => ({

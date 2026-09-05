@@ -1,0 +1,27 @@
+version: 2
+
+updates:
+  # The web app. Dev-tooling bumps are grouped into one PR a week, because
+  # they land together anyway and separate PRs for each would drown the repo.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      dev-tooling:
+        dependency-type: development
+        update-types: [minor, patch]
+
+  # The Cloud Function, which has its own package.json.
+  - package-ecosystem: npm
+    directory: /functions
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 3
+
+  # The actions used by .github/workflows/ci.yml.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

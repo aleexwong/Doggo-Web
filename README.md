@@ -46,8 +46,11 @@ screen where there isn't.
 
 To swap which you get without a query string, change `DEFAULT_FRAME` in
 [`src/game/layout.ts`](src/game/layout.ts) — that one constant is the whole
-switch. The pre-paint theme script in `index.html` has to assume the same
-default; its comment says so.
+switch, `index.html` included. The script that picks a theme before first
+paint runs before any module can load, so it can't import; instead a Vite
+plugin injects the theme key, the surface colours and the list of frames that
+want dark from [`src/game/appearance.ts`](src/game/appearance.ts) into the
+HTML at build time.
 
 ## Design
 
@@ -138,12 +141,28 @@ Players can post under a chosen name (2–12 chars) or one-tap **post as guest**
 filter (`src/game/profanity.ts`) before posting; note this is a UX gate only —
 a determined user can bypass any client check.
 
+The filter lowercases the name, undoes common leet substitutions, drops
+everything that isn't a letter, and then looks for any blocked word as a
+pattern that tolerates repeated letters — so `sh1t`, `f.u.c.k` and `fuuuck`
+are all caught. It over-blocks by design: a name that merely contains a
+blocked word (`Scunthorpe`, `Raccoon`) is refused, and posting as a guest is
+the escape hatch.
+
 ### Server-side enforcement (recommended)
 
 `functions/` holds a Cloud Function (`submitScore`) that re-validates every
 post — mode, score bounds, name length, the same profanity list, and a
-best-effort per-IP rate limit — and writes with the Admin SDK. To make it the
-enforced write path:
+best-effort per-IP rate limit — and writes with the Admin SDK.
+
+The word list really is the same list:
+[`functions/profanity-words.json`](functions/profanity-words.json) is read by
+both filters. It sits in `functions/` because `firebase deploy` packages only
+that directory, so a copy anywhere else would never reach the server; Vite
+inlines it into the client bundle at build time. Each side keeps its own few
+lines of matching code, and `test/profanity-parity.test.ts` checks they still
+agree on every word in the list.
+
+To make the function the enforced write path:
 
 1. Deploy it (needs the Blaze plan for outbound functions):
 
@@ -166,12 +185,69 @@ blocks requests that don't originate from your app with no code changes.
 npm install
 npm run dev      # local dev server
 npm run build    # typecheck + production build (dist/)
+npm run lint     # ESLint
+npm run format   # Prettier, in place (format:check to only report)
+npm test         # unit tests — pure logic, no browser, under a second
 npm run test:e2e # headless-browser suite with Dog.CEO and Firestore mocked
 ```
 
-CI (GitHub Actions) runs the build and the e2e suite on every push and PR.
-Locally, point the suite at a pre-installed browser with
+### Lint and format
+
+Prettier owns formatting; `eslint-config-prettier` switches off every
+stylistic ESLint rule, so anything ESLint reports is a real problem rather
+than a matter of taste. Two things are deliberately left alone: the
+stylesheet and the Markdown, both hand-arranged (see `.prettierignore`).
+
+`eslint-plugin-react-hooks` runs at full strength, including the newer
+`set-state-in-effect` rule. Two places suppress it with a comment saying
+why — resetting photo state per round, and clearing the board when the
+leaderboard mode changes.
+
+### Tests
+
+Two layers, because they catch different things:
+
+- **Unit** (`test/`, `node --test` via [tsx](https://tsx.is)) covers the pure
+  logic the e2e suite can only reach indirectly: every branch of the game
+  reducer, breed-name formatting, distractor choice, the profanity filter and
+  the leaderboard name rules. No build, no browser, no network.
+- **E2E** (`e2e/run.mjs`, Playwright) drives the real app in headless Chromium
+  with Dog.CEO and Firestore mocked at the network layer.
+
+Node 22 or newer (the unit-test script uses the test runner's glob support).
+Locally, point the e2e suite at a pre-installed browser with
 `CHROMIUM_PATH=/path/to/chromium npm run test:e2e`.
+
+### CI
+
+[GitHub Actions](.github/workflows/ci.yml) runs on every push to `main` and
+every PR, in three jobs:
+
+| Job | What it runs |
+| --- | --- |
+| **Lint, types and unit tests** | `lint`, `format:check`, `build` (typecheck + bundle), `test`, and a syntax check on the Cloud Function |
+| **End-to-end** | the Playwright suite in headless Chromium |
+| **Dependency audit** | `npm audit --audit-level=high`, reporting only |
+
+The fast job is split out so a broken PR fails in seconds instead of waiting
+on a browser. The audit job does not fail the build: a vulnerable transitive
+dependency is rarely something the PR in front of you can fix, and
+[Dependabot](.github/dependabot.yml) is what raises the upgrade — weekly, for
+the app, the function, and the actions themselves.
+
+`npm audit` currently reports advisories against Vite's dev server (path
+traversal and `server.fs.deny` bypass). They affect `npm run dev`, not the
+static bundle that ships, and clearing them means Vite 5 → 8. That upgrade
+belongs in its own change, with the e2e suite to check it.
+
+Deployment is not automated here, because the hosting target lives outside
+this repo. Firestore rules and the Cloud Function are deployed by hand; see
+the leaderboard section above.
+
+## Licence
+
+[MIT](LICENSE). Dog photos come from [Dog.CEO](https://dog.ceo/dog-api/) and
+carry their own terms.
 
 ## Embed (Next.js site)
 

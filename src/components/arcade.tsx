@@ -12,7 +12,9 @@ function Wedge({ size, bite }: { size: number; bite: number }) {
   const yBottom = 12 + r * Math.sin(rad)
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d={`M12 12 L${x.toFixed(2)} ${yTop.toFixed(2)} A${r} ${r} 0 1 0 ${x.toFixed(2)} ${yBottom.toFixed(2)} Z`} />
+      <path
+        d={`M12 12 L${x.toFixed(2)} ${yTop.toFixed(2)} A${r} ${r} 0 1 0 ${x.toFixed(2)} ${yBottom.toFixed(2)} Z`}
+      />
     </svg>
   )
 }

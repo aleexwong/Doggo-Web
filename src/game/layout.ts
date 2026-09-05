@@ -11,16 +11,28 @@
  */
 export type Frame = 'phone' | 'web' | 'arcade'
 
-/** Changing this also changes what the pre-paint script in index.html has
- *  to assume — see the comment there. */
+/** The one switch. The pre-paint script in index.html is generated from this
+ *  at build time (see src/game/appearance.ts), so it follows automatically. */
 export const DEFAULT_FRAME: Frame = 'arcade'
+
+/** Every accepted `?frame=` value, and the frame it means. */
+export const FRAME_ALIASES: Record<string, Frame> = {
+  web: 'web',
+  none: 'web',
+  bare: 'web',
+  arcade: 'arcade',
+  crt: 'arcade',
+  phone: 'phone',
+  device: 'phone',
+}
 
 export function initialFrame(): Frame {
   try {
     const asked = new URLSearchParams(location.search).get('frame')?.toLowerCase()
-    if (asked === 'web' || asked === 'none' || asked === 'bare') return 'web'
-    if (asked === 'arcade' || asked === 'crt') return 'arcade'
-    if (asked === 'phone' || asked === 'device') return 'phone'
+    // Compared by value rather than `in`, so a query like ?frame=constructor
+    // can't reach Object.prototype and come back as something truthy.
+    const frame = asked ? FRAME_ALIASES[asked] : undefined
+    if (frame === 'web' || frame === 'arcade' || frame === 'phone') return frame
   } catch {
     /* no location (SSR, tests) — fall through to the default */
   }

@@ -35,6 +35,11 @@ export function GameScreen({
   const [imgTries, setImgTries] = useState(0)
   const [imgLoaded, setImgLoaded] = useState(false)
   useEffect(() => {
+    // Resetting per-photo state when the round changes is the point of this
+    // effect: a new photo starts with no retries and no load yet. The
+    // alternative React suggests — remounting via a key — would mean pulling
+    // the <img> into its own component just to satisfy the rule.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setImgSrc(round?.imageUrl)
     setImgTries(0)
     setImgLoaded(false)
@@ -49,9 +54,7 @@ export function GameScreen({
       })
   }
   const milestone =
-    phase === 'reveal' &&
-    picked === round?.answer.path &&
-    MILESTONES.includes(state.streak)
+    phase === 'reveal' && picked === round?.answer.path && MILESTONES.includes(state.streak)
 
   // Keyboard play: 1-4 selects an answer.
   useEffect(() => {
@@ -69,9 +72,7 @@ export function GameScreen({
   const isBlitz = state.mode === 'blitz'
   const urgent = isBlitz && state.timeLeft <= 10
   // Blitz counts the clock down; streak fills toward the next celebration.
-  const progress = isBlitz
-    ? state.timeLeft / BLITZ_SECONDS
-    : milestoneProgress(state.streak).pct
+  const progress = isBlitz ? state.timeLeft / BLITZ_SECONDS : milestoneProgress(state.streak).pct
   const nextMilestone = milestoneProgress(state.streak).next
 
   const hudRight = isBlitz ? (
@@ -102,9 +103,13 @@ export function GameScreen({
         <div className="hud">
           <span className="chip score-chip">
             {state.mode === 'streak' ? (
-              <><FlameSketch size={15} /> Streak {state.streak}</>
+              <>
+                <FlameSketch size={15} /> Streak {state.streak}
+              </>
             ) : (
-              <><PawMark size={14} /> Score {state.score}</>
+              <>
+                <PawMark size={14} /> Score {state.score}
+              </>
             )}
           </span>
           <span className="question">What breed is this?</span>
@@ -146,10 +151,14 @@ export function GameScreen({
                 onClick={() => onAnswer(b.path)}
               >
                 {revealing && isAnswer && (
-                  <span className="answer-mark" aria-hidden="true"><CheckIcon size={17} /></span>
+                  <span className="answer-mark" aria-hidden="true">
+                    <CheckIcon size={17} />
+                  </span>
                 )}
                 {revealing && isPicked && !isAnswer && (
-                  <span className="answer-mark" aria-hidden="true"><CloseIcon size={17} /></span>
+                  <span className="answer-mark" aria-hidden="true">
+                    <CloseIcon size={17} />
+                  </span>
                 )}
                 {b.name}
               </button>

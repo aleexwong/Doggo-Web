@@ -5,16 +5,64 @@ on:
     branches: [main]
   pull_request:
 
+# A new push supersedes the run still going for the same branch.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
-  test:
+  # Everything that runs in seconds, so a broken PR says so quickly.
+  check:
+    name: Lint, types and unit tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm run build
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm run build # tsc -b, then the production bundle
+      - run: npm test
+      # functions/ has its own dependencies and no lockfile here, so it isn't
+      # installed. Its shared logic is covered by the parity unit test, and
+      # ESLint parses every file; this catches a syntax error in the rest.
+      - run: node --check functions/index.js
+
+  e2e:
+    name: End-to-end
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
+
+  # Reports known advisories without failing an unrelated PR — a vulnerable
+  # transitive dependency is usually not something that PR can fix. Dependabot
+  # (.github/dependabot.yml) is what actually raises the upgrade.
+  #
+  # continue-on-error sits on the step, not the job: at job level it keeps the
+  # workflow run green but the check still reports red, which is the opposite
+  # of "reporting only". On the step, the report is printed and the job passes.
+  audit:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm audit --audit-level=high
+        continue-on-error: true
