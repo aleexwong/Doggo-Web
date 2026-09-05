@@ -173,12 +173,14 @@ body {
   color: var(--stage-ink);
   font-family: Roboto, 'Roboto Flex', system-ui, 'Segoe UI', sans-serif;
   min-height: 100vh;
+  min-height: 100dvh;
   -webkit-font-smoothing: antialiased;
   transition: background-color var(--dur-3) var(--ease-emph);
 }
 
 .page {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -193,9 +195,20 @@ body {
 /* ---------- Phone frame ---------- */
 
 .phone {
-  /* the 42vh term keeps the whole device on screen on short viewports */
-  width: min(384px, 94vw, 42vh);
+  /* The height term keeps the whole device on screen on short viewports: the
+     ratio turns a width into 2.17x that in height, and the page spends about
+     90px more on padding, gap and credits. The floor stops the device
+     shrinking to a width the screens can't lay out in — below roughly 300px
+     the mode cards shred, and on a landscape phone the height term alone
+     asked for a 164px device. Under the floor the page scrolls instead,
+     which is the better trade. */
+  width: max(min(384px, 94vw, calc(46vh - 42px)), min(94vw, 300px));
+  width: max(min(384px, 94vw, calc(46dvh - 42px)), min(94vw, 300px));
   aspect-ratio: 9 / 19.5;
+  /* A flex item's automatic minimum size is its content's, and that beats the
+     ratio: without this the device stretched to whatever height the screens
+     asked for — 856px tall inside a 390px window. */
+  min-height: 0;
   border-radius: var(--outer-r);
   padding: var(--bezel-w);
   position: relative;
@@ -290,7 +303,17 @@ body {
 .statusbar-dark { background: #0c0c0d; color: #e8e9ea; }
 .statusbar-icons { display: flex; gap: 5px; align-items: center; }
 
-.app-area { flex: 1; display: flex; overflow: hidden; min-height: 0; }
+/* The screens live inside three differently sized frames — a 384px device, a
+   640px tube, the whole window — so "is there room for two columns?" is a
+   question about this box, not about the viewport. Everything the game screen
+   lays out from is a @container appframe query. */
+.app-area {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  min-height: 0;
+  container: appframe / size;
+}
 
 .gesturebar {
   padding: 7px 0 9px;
@@ -680,7 +703,14 @@ button { font: inherit; cursor: pointer; color: inherit; }
 /* The whole dog is always in frame — no cropped heads or tails, which
    matters when the dog is the thing to identify. */
 .dog-card img {
-  position: relative;
+  /* Absolutely placed and centred by auto margins. As a grid item the photo's
+     max-height: 100% resolved against an indefinite track, so on a short
+     screen it kept its natural height and spilled over the answers below —
+     covering them, and swallowing the taps meant for them. Against an
+     absolute containing block the same 100% is the card's real height. */
+  position: absolute;
+  inset: 0;
+  margin: auto;
   z-index: 1;
   max-width: 100%;
   max-height: 100%;
@@ -1147,6 +1177,21 @@ button { font: inherit; cursor: pointer; color: inherit; }
   .crt-tube { border-radius: 8% / 4.6%; }
 }
 
+/* Turned sideways there is no height for a vertical tube: 62vh of a 390px
+   window is a 242px monitor. Horizontal cabinets are as real as vertical
+   ones, so the tube turns with the device and the room around it tightens. */
+@media (orientation: landscape) and (max-height: 620px) {
+  .page-arcade { padding: 4px 10px; gap: 6px; }
+  .crt {
+    height: 92vh;
+    height: 92dvh;
+    width: min(94vw, calc(92dvh * 4 / 3));
+    aspect-ratio: auto;
+  }
+  .crt-bezel { padding: 2.6%; border-radius: 3.4% / 5%; }
+  .crt-tube { border-radius: 4.6% / 7%; }
+}
+
 .crt-bezel {
   position: absolute;
   inset: 0;
@@ -1298,6 +1343,15 @@ button { font: inherit; cursor: pointer; color: inherit; }
   .page-web .home h1 { font-size: 40px; }
   .page-web .hero-avatar { width: 120px; height: 120px; }
   .page-web .screen { padding-inline: 20px; }
+  /* A tablet held upright has room the phone column doesn't use: at 560px the
+     photo stopped growing and left a band of empty surface above and below
+     it. The board keeps its own, narrower cap. */
+  .page-web .appbar,
+  .page-web .progress-strip,
+  .page-web .screen {
+    max-width: 720px;
+  }
+  .page-web .board { max-width: 640px; }
 }
 
 @media (min-width: 900px) {
@@ -1308,37 +1362,132 @@ button { font: inherit; cursor: pointer; color: inherit; }
   }
 }
 
-/* Two columns once the viewport is wide (and tall) enough to justify it:
-   photo on the left, question and answers on the right. */
-@media (min-width: 900px) and (min-height: 520px) {
-  .page-web .game {
+/* ============================================================
+   Game screen: one column or two
+   Asked of the app area rather than the window, because the same screens
+   run inside a 384px device, a 640px tube and the whole browser. Two
+   columns whenever the room is wider than it is tall — a desktop window, a
+   tablet on its side, a phone turned sideways. Stacked, the photo gets what
+   is left over after the answers, and on a landscape phone that is nothing.
+   ============================================================ */
+
+@container appframe (min-width: 380px) and (min-aspect-ratio: 5 / 4) {
+  .game {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(300px, 380px);
+    grid-template-columns: minmax(0, 1fr) clamp(160px, 40%, 380px);
+    /* The photo spans every row, so it takes the full height of the area
+       rather than the height of its own content — it has none, being
+       absolutely placed. The two blank rows centre the question and the
+       answers as one block beside it. */
+    grid-template-rows: minmax(0, 1fr) auto auto minmax(0, 1fr);
     grid-template-areas:
+      'photo .'
       'photo hud'
-      'photo answers';
-    align-content: center;
-    column-gap: 32px;
-    row-gap: 16px;
-    max-width: 1140px;
-    padding: 20px 28px 28px;
+      'photo answers'
+      'photo .';
+    column-gap: clamp(12px, 3cqw, 32px);
+    row-gap: 12px;
+    padding: 8px 14px 14px;
+    /* .screen centres its children; as a grid that would leave the photo at
+       its own height, which is none. */
+    align-items: stretch;
   }
-  .page-web .game .hud {
+  .game .hud {
     grid-area: hud;
     align-self: end;
     flex-direction: column;
     align-items: flex-start;
-    gap: 10px;
-  }
-  .page-web .game .question { font-size: 19px; color: var(--m3-on-surface); }
-  .page-web .game .dog-card { grid-area: photo; height: min(68vh, 620px); }
-  .page-web .game .answers {
-    grid-area: answers;
-    align-self: start;
-    grid-template-columns: 1fr;
     gap: 8px;
   }
-  .page-web .game .answer { min-height: 58px; font-size: 15px; }
+  .game .question { font-size: clamp(13px, 2.2cqw, 19px); color: var(--m3-on-surface); }
+  .game .dog-card { grid-area: photo; }
+  .game .answers {
+    grid-area: answers;
+    align-self: start;
+    align-content: center;
+    grid-template-columns: 1fr;
+    /* The answers share the room they are given: they grow to 62px and no
+       further in a tall window, and fall back to a tappable 44px in a short
+       one rather than pushing the fourth answer off the bottom. */
+    grid-auto-rows: minmax(44px, 62px);
+    gap: clamp(6px, 1.4cqh, 8px);
+  }
+  .game .answer {
+    min-height: 44px;
+    font-size: clamp(13px, 3.2cqw, 15px);
+  }
+
+  /* The frameless presentation caps its content column; the two-column game
+     wants the wide one instead, and its chrome has to follow. */
+  .page-web .appbar,
+  .page-web .progress-strip,
+  .page-web .game {
+    max-width: 1140px;
+  }
+  .page-web .game { padding: 12px clamp(16px, 3cqw, 28px) 24px; }
+}
+
+/* ============================================================
+   Short room: a phone turned sideways, or a squat iframe
+   Every band of chrome comes out of the photo, and the screens that are
+   stacks of fixed-height controls have to give somewhere.
+   ============================================================ */
+
+@container appframe (max-height: 420px) {
+  /* The icons set the app bar's height, so they come down with it. */
+  .appbar { min-height: 44px; padding: 2px 6px 2px 10px; }
+  .appbar-icon { width: 40px; height: 40px; }
+  .progress-strip { padding: 0 12px 4px; }
+  .wave { height: 12px; }
+  .wave-rest { top: 4px; }
+
+  /* With no room for the whole stack, a flex column shrinks its items — a
+     52px button came out 19px tall. Let them keep their size and scroll. */
+  .home,
+  .gameover { overflow-y: auto; }
+  .gameover { justify-content: flex-start; gap: 8px; }
+  .gameover > * { flex: none; }
+  .result-card { padding: 14px 16px; }
+  .final-score { font-size: 46px; }
+
+  /* The hero turns into a header — the dog beside the title rather than above
+     it — so both mode cards stay on screen at full width. */
+  .home { padding-top: 4px; gap: 12px; }
+  .hero {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    column-gap: 12px;
+    margin-top: 0;
+    text-align: left;
+  }
+  .hero-avatar { width: 56px; height: 56px; grid-row: span 2; }
+  .hero-avatar > svg { width: 34px; height: 34px; }
+  .home h1 { font-size: 24px; }
+  .home .tagline { font-size: 13px; }
+  .mode-card { padding: 12px 14px; }
+  .mode-icon { width: 44px; height: 44px; }
+
+  .board { gap: 6px; }
+  .board-title { font-size: 15px; letter-spacing: 3px; margin: 0; }
+}
+
+@container appframe (min-width: 380px) and (min-aspect-ratio: 5 / 4) and (max-height: 420px) {
+  .game {
+    /* The score and the question take one line across the top instead of a
+       column above the answers: in a 170px column that question wrapped to
+       three lines and pushed the fourth answer off the bottom. */
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-areas:
+      'hud hud'
+      'photo answers';
+    padding: 4px 12px 10px;
+    row-gap: 8px;
+  }
+  .game .hud { align-self: start; flex-direction: row; align-items: center; gap: 8px; }
+  .game .question { font-size: 13px; color: var(--m3-on-surface-variant); }
+  .game .answers { align-self: stretch; gap: 6px; }
+  .page-web .game { padding: 6px clamp(16px, 3cqw, 28px) 12px; }
 }
 
 /* ---------- Error-boundary fallback (rendered outside the phone frame) ---------- */
@@ -1360,6 +1509,15 @@ button { font: inherit; cursor: pointer; color: inherit; }
   overflow: hidden;
   clip: rect(0 0 0 0);
   white-space: nowrap;
+}
+
+/* Touch: the pointer is a fingertip, so the small controls grow to a real
+   target. Only the box grows — the type and the arcade look don't change. */
+@media (pointer: coarse) {
+  .appbar-icon { width: 44px; height: 44px; }
+  .seg { height: 44px; }
+  .guest-link { height: 44px; }
+  .btn-text.inline { padding: 6px 4px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

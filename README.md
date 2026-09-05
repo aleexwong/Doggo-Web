@@ -31,15 +31,17 @@ glass at the edge, a slow roll bar, and a power LED. It defaults to the dark
 theme, since a bright picture on a tube looks wrong, but a theme the player
 has actually chosen still wins. Below 620px the tube stops holding 3:4 and
 grows into the available height — on a phone a fixed 3:4 box costs the photo
-half its area, and a taller portrait tube still reads as one. The
-leaderboard's own CRT treatment switches off inside the tube rather than
-stacking two sets of scanlines.
+half its area, and a taller portrait tube still reads as one. Turned sideways
+the tube turns with the device and sits as a horizontal 4:3 cabinet, because
+62vh of a 390px window is a 242px monitor. The leaderboard's own CRT treatment
+switches off inside the tube rather than stacking two sets of scanlines.
 
 The **frameless** version is a real web layout, not a stretched phone column:
-a full-width header over a centred content column, and at ≥900px (given the
-height for it) the game screen splits in two — photo on the left, question and
-answers stacked on the right, one answer per row. The arcade leaderboard goes
-edge to edge and reads like an attract screen.
+a full-width header over a centred content column, which widens at ≥700px so a
+tablet held upright doesn't read as a big phone. Where the room is wider than
+it is tall, the game screen splits in two — photo on the left, question and
+answers stacked on the right, one answer per row (see [Sizes](#sizes)). The
+arcade leaderboard goes edge to edge and reads like an attract screen.
 
 Credits sit under the frame where there is one to sit under, and on the home
 screen where there isn't.
@@ -74,6 +76,39 @@ the flat-primary-app-bar Material of a few releases back:
 - A wavy progress indicator for the blitz clock and the streak's progress to
   its next milestone, and a shape-morphing loading indicator.
 - Everything is gated behind `prefers-reduced-motion`.
+
+### Sizes
+
+The same screens run inside a 384px device, a 640px tube and the whole
+browser, so "is there room for two columns?" is a question about the app area,
+not about the window. The game screen, and everything that has to give way on
+a short screen, are `@container` queries on `.app-area` rather than media
+queries:
+
+- **Wider than tall** — container at least 380px wide and 5:4 — the photo
+  takes the left, the question and the answers the right, one answer per row.
+  That covers a desktop window, a tablet on its side, and a phone turned
+  sideways, which stacked has no height left for a photo at all.
+- **Short** — container 420px tall or less — the app bar and the progress
+  strip lose their padding, the score and the question share one line, and the
+  home hero becomes a header with the dog beside the title instead of above
+  it. Screens that are stacks of fixed-height controls scroll rather than
+  squash them: a 52px button pressed into 19px is not a button.
+- Otherwise the phone layout: the photo above a 2×2 grid of answers.
+
+The photo is placed absolutely inside its card, so its `max-height: 100%` has
+the card's real height to resolve against. As a grid item the same percentage
+had nothing definite to measure, and on a short screen the photo kept its
+natural height and covered the answers below it — along with the taps meant
+for them.
+
+The drawn device keeps its 9:19.5 ratio and never stretches to fit its
+contents, and its width has a floor: under about 300px the screens have
+nothing to lay out in, so on a very short viewport the page scrolls rather
+than shrink the device further.
+
+Touch pointers get 44px targets (`@media (pointer: coarse)`), which is the one
+thing here the app area can't tell you.
 
 ### Copy
 
