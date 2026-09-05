@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useState } from 'react'
+import { SURFACE, THEME_KEY as KEY, Theme } from './appearance'
 
-export type Theme = 'light' | 'dark'
-
-const KEY = 'doggo.theme'
-/** Matches --m3-surface in styles.css, so the browser chrome blends in. */
-const SURFACE: Record<Theme, string> = { light: '#fcfcfc', dark: '#0f1011' }
+// The storage key and the surface colours are shared with the pre-paint
+// script in index.html, so they live in appearance.ts.
+export type { Theme }
 
 // localStorage can throw (Safari private mode, storage disabled), so every
 // access is guarded — a blocked store just means the choice doesn't persist.

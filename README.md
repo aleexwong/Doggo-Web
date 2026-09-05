@@ -46,8 +46,11 @@ screen where there isn't.
 
 To swap which you get without a query string, change `DEFAULT_FRAME` in
 [`src/game/layout.ts`](src/game/layout.ts) — that one constant is the whole
-switch. The pre-paint theme script in `index.html` has to assume the same
-default; its comment says so.
+switch, `index.html` included. The script that picks a theme before first
+paint runs before any module can load, so it can't import; instead a Vite
+plugin injects the theme key, the surface colours and the list of frames that
+want dark from [`src/game/appearance.ts`](src/game/appearance.ts) into the
+HTML at build time.
 
 ## Design
 
@@ -142,8 +145,17 @@ a determined user can bypass any client check.
 
 `functions/` holds a Cloud Function (`submitScore`) that re-validates every
 post — mode, score bounds, name length, the same profanity list, and a
-best-effort per-IP rate limit — and writes with the Admin SDK. To make it the
-enforced write path:
+best-effort per-IP rate limit — and writes with the Admin SDK.
+
+The word list really is the same list:
+[`functions/profanity-words.json`](functions/profanity-words.json) is read by
+both filters. It sits in `functions/` because `firebase deploy` packages only
+that directory, so a copy anywhere else would never reach the server; Vite
+inlines it into the client bundle at build time. Each side keeps its own few
+lines of matching code, and `test/profanity-parity.test.ts` checks they still
+agree on every word in the list.
+
+To make the function the enforced write path:
 
 1. Deploy it (needs the Blaze plan for outbound functions):
 
@@ -177,9 +189,7 @@ npm run test:e2e # headless-browser suite with Dog.CEO and Firestore mocked
 Prettier owns formatting; `eslint-config-prettier` switches off every
 stylistic ESLint rule, so anything ESLint reports is a real problem rather
 than a matter of taste. Two things are deliberately left alone: the
-stylesheet and the Markdown (both hand-arranged — see `.prettierignore`), and
-the word tables in the profanity filters, which carry a `// prettier-ignore`
-so they stay readable as tables.
+stylesheet and the Markdown, both hand-arranged (see `.prettierignore`).
 
 `eslint-plugin-react-hooks` runs at full strength, including the newer
 `set-state-in-effect` rule. Two places suppress it with a comment saying

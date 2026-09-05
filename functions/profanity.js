@@ -1,19 +1,11 @@
-// Server-side mirror of src/game/profanity.ts. Keep the two in sync — the
-// client filter is a UX gate; this copy is the enforced one.
+// Server-side profanity filter for leaderboard names — the enforced one.
+//
+// The word list and the leet map are data, shared with the client filter in
+// src/game/profanity.ts (see the note there for why they live in this
+// directory). Only the few lines of matching below are written twice, and
+// test/profanity-parity.test.ts checks the two agree.
 
-// prettier-ignore
-const BLOCKED = [
-  'fuck', 'shit', 'bitch', 'cunt', 'asshole', 'dick', 'pussy', 'bastard',
-  'slut', 'whore', 'wank', 'twat', 'prick', 'dildo', 'cock', 'boner',
-  'nigger', 'nigga', 'faggot', 'fag', 'retard', 'rape', 'rapist', 'nazi',
-  'coon', 'spic', 'kike', 'chink', 'tranny', 'molest', 'pedo',
-]
-
-// prettier-ignore
-const LEET = {
-  '0': 'o', '1': 'i', '3': 'e', '4': 'a', '5': 's', '7': 't',
-  '8': 'b', '@': 'a', $: 's', '!': 'i', '|': 'i',
-}
+const { blocked: BLOCKED, leet: LEET } = require('./profanity-words.json')
 
 function normalize(s) {
   return String(s)

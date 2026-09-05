@@ -7,23 +7,18 @@
 // an innocent name that embeds a blocked word (the classic "Scunthorpe
 // problem"). Guest posting (guestName) is the clean escape hatch for anyone
 // caught by a false positive.
+//
+// The word list itself lives in functions/ because `firebase deploy` packages
+// only that directory — a file anywhere else would never reach the server.
+// Vite inlines this JSON at build time, so both filters read one list, and
+// test/profanity-parity.test.ts checks they still agree on the answer.
+import words from '../../functions/profanity-words.json'
 
 // Curated, lowercase, letters-only. Bare short words prone to false positives
 // (e.g. "ass") are intentionally omitted in favour of their compound forms.
-// prettier-ignore
-const BLOCKED = [
-  'fuck', 'shit', 'bitch', 'cunt', 'asshole', 'dick', 'pussy', 'bastard',
-  'slut', 'whore', 'wank', 'twat', 'prick', 'dildo', 'cock', 'boner',
-  'nigger', 'nigga', 'faggot', 'fag', 'retard', 'rape', 'rapist', 'nazi',
-  'coon', 'spic', 'kike', 'chink', 'tranny', 'molest', 'pedo',
-]
-
+const BLOCKED: string[] = words.blocked
 // Common leet substitutions, so "sh1t" / "f4g" still normalize to the word.
-// prettier-ignore
-const LEET: Record<string, string> = {
-  '0': 'o', '1': 'i', '3': 'e', '4': 'a', '5': 's', '7': 't',
-  '8': 'b', '@': 'a', '$': 's', '!': 'i', '|': 'i',
-}
+const LEET: Record<string, string> = words.leet
 
 function normalize(s: string): string {
   return s

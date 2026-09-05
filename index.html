@@ -20,20 +20,20 @@
     <link rel="manifest" href="/manifest.webmanifest" />
     <script>
       // Apply the stored/system theme before first paint so the app never
-      // flashes the wrong one. This has to run before the bundle, so it
-      // repeats three things it cannot import: the --m3-surface colours (see
-      // the SURFACE map in src/game/theme.ts), DEFAULT_FRAME and
-      // framePrefersDark (src/game/layout.ts). Keep them in step.
+      // flashes the wrong one. This has to run before the bundle, so it can't
+      // import anything — instead __DOGGO_APPEARANCE__ is replaced at build
+      // time with the values from src/game/appearance.ts (see the plugin in
+      // vite.config.ts). Nothing here is a second copy of a constant.
       try {
-        var t = localStorage.getItem('doggo.theme')
+        var cfg = __DOGGO_APPEARANCE__
+        var t = localStorage.getItem(cfg.key)
         var asked = (location.search.match(/[?&]frame=([a-z]+)/i) || [, ''])[1].toLowerCase()
-        // No ?frame= means DEFAULT_FRAME, which is the CRT, which wants dark.
-        var crt = asked === '' || asked === 'arcade' || asked === 'crt'
+        // An empty ?frame= means DEFAULT_FRAME; otherwise ask the alias table.
+        var wantsDark = asked === '' ? cfg.defaultDark : cfg.darkFrames.indexOf(asked) >= 0
         if (t !== 'light' && t !== 'dark')
-          t = crt || matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+          t = wantsDark || matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
         document.documentElement.dataset.theme = t
-        document.querySelector('meta[name="theme-color"]').content =
-          t === 'dark' ? '#0f1011' : '#fcfcfc'
+        document.querySelector('meta[name="theme-color"]').content = cfg.surface[t]
       } catch (e) {
         /* storage or matchMedia blocked - CSS media query still applies */
       }
