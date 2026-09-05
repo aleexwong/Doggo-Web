@@ -207,9 +207,35 @@ Two layers, because they catch different things:
 - **E2E** (`e2e/run.mjs`, Playwright) drives the real app in headless Chromium
   with Dog.CEO and Firestore mocked at the network layer.
 
-CI (GitHub Actions) runs the build and the e2e suite on every push and PR.
-Locally, point the suite at a pre-installed browser with
+Node 22 or newer (the unit-test script uses the test runner's glob support).
+Locally, point the e2e suite at a pre-installed browser with
 `CHROMIUM_PATH=/path/to/chromium npm run test:e2e`.
+
+### CI
+
+[GitHub Actions](.github/workflows/ci.yml) runs on every push to `main` and
+every PR, in three jobs:
+
+| Job | What it runs |
+| --- | --- |
+| **Lint, types and unit tests** | `lint`, `format:check`, `build` (typecheck + bundle), `test`, and a syntax check on the Cloud Function |
+| **End-to-end** | the Playwright suite in headless Chromium |
+| **Dependency audit** | `npm audit --audit-level=high`, reporting only |
+
+The fast job is split out so a broken PR fails in seconds instead of waiting
+on a browser. The audit job does not fail the build: a vulnerable transitive
+dependency is rarely something the PR in front of you can fix, and
+[Dependabot](.github/dependabot.yml) is what raises the upgrade — weekly, for
+the app, the function, and the actions themselves.
+
+Deployment is not automated here, because the hosting target lives outside
+this repo. Firestore rules and the Cloud Function are deployed by hand; see
+the leaderboard section above.
+
+## Licence
+
+[MIT](LICENSE). Dog photos come from [Dog.CEO](https://dog.ceo/dog-api/) and
+carry their own terms.
 
 ## Embed (Next.js site)
 

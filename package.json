@@ -2,7 +2,11 @@
   "name": "doggo-web",
   "private": true,
   "version": "1.0.0",
+  "license": "MIT",
   "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
