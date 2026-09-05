@@ -50,10 +50,13 @@ jobs:
   # Reports known advisories without failing an unrelated PR — a vulnerable
   # transitive dependency is usually not something that PR can fix. Dependabot
   # (.github/dependabot.yml) is what actually raises the upgrade.
+  #
+  # continue-on-error sits on the step, not the job: at job level it keeps the
+  # workflow run green but the check still reports red, which is the opposite
+  # of "reporting only". On the step, the report is printed and the job passes.
   audit:
     name: Dependency audit
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -62,3 +65,4 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm audit --audit-level=high
+        continue-on-error: true

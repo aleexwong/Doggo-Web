@@ -235,6 +235,11 @@ dependency is rarely something the PR in front of you can fix, and
 [Dependabot](.github/dependabot.yml) is what raises the upgrade — weekly, for
 the app, the function, and the actions themselves.
 
+`npm audit` currently reports advisories against Vite's dev server (path
+traversal and `server.fs.deny` bypass). They affect `npm run dev`, not the
+static bundle that ships, and clearing them means Vite 5 → 8. That upgrade
+belongs in its own change, with the e2e suite to check it.
+
 Deployment is not automated here, because the hosting target lives outside
 this repo. Firestore rules and the Cloud Function are deployed by hand; see
 the leaderboard section above.
