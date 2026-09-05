@@ -14,13 +14,24 @@ function normalize(s) {
     .map((c) => LEET[c] || c)
     .join('')
     .replace(/[^a-z]/g, '')
-    .replace(/(.)\1+/g, '$1')
 }
+
+// Repeats are tolerated by the pattern rather than squeezed out of the name —
+// see the note in src/game/profanity.ts.
+const PATTERNS = BLOCKED.map(
+  (word) =>
+    new RegExp(
+      word
+        .split('')
+        .map((c) => `${c}+`)
+        .join(''),
+    ),
+)
 
 function isClean(name) {
   const n = normalize(name)
   if (!n) return true
-  return !BLOCKED.some((word) => n.includes(word))
+  return !PATTERNS.some((re) => re.test(n))
 }
 
 module.exports = { isClean }

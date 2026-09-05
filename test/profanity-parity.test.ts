@@ -55,7 +55,14 @@ test('client and server agree on every word in the shared list', () => {
       .join('')
 
   for (const word of words.blocked) {
-    ;[word, word.toUpperCase(), leetify(word), `xx${word}xx`].forEach(agree)
+    const shapes = [word, word.toUpperCase(), leetify(word), `xx${word}xx`]
+    shapes.forEach(agree)
+    // And both must actually refuse it — agreeing to let a slur through is
+    // still agreement. This is what caught the collapsed-repeats bug.
+    for (const shape of shapes) {
+      assert.equal(isClean(shape), false, `client allowed "${shape}"`)
+      assert.equal(server.isClean(shape), false, `server allowed "${shape}"`)
+    }
   }
 })
 

@@ -27,12 +27,26 @@ function normalize(s: string): string {
     .map((c) => LEET[c] ?? c)
     .join('')
     .replace(/[^a-z]/g, '') // drop spaces, digits, punctuation
-    .replace(/(.)\1+/g, '$1') // collapse repeats: "fuuuck" -> "fuck"
 }
+
+// Repeats are tolerated by the pattern rather than squeezed out of the name:
+// "fuck" becomes /f+u+c+k+/, which still catches "fuuuck" but keeps the double
+// letters in words that have them. Collapsing the name instead used to turn
+// "nigger" into "niger", which then matched nothing in the list. Words come
+// from a curated letters-only list, so there is nothing to escape.
+const PATTERNS = BLOCKED.map(
+  (word) =>
+    new RegExp(
+      word
+        .split('')
+        .map((c) => `${c}+`)
+        .join(''),
+    ),
+)
 
 /** True if the name has no blocked term in its normalized form. */
 export function isClean(name: string): boolean {
   const n = normalize(name)
   if (!n) return true
-  return !BLOCKED.some((word) => n.includes(word))
+  return !PATTERNS.some((re) => re.test(n))
 }

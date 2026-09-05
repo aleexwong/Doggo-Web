@@ -141,6 +141,13 @@ Players can post under a chosen name (2–12 chars) or one-tap **post as guest**
 filter (`src/game/profanity.ts`) before posting; note this is a UX gate only —
 a determined user can bypass any client check.
 
+The filter lowercases the name, undoes common leet substitutions, drops
+everything that isn't a letter, and then looks for any blocked word as a
+pattern that tolerates repeated letters — so `sh1t`, `f.u.c.k` and `fuuuck`
+are all caught. It over-blocks by design: a name that merely contains a
+blocked word (`Scunthorpe`, `Raccoon`) is refused, and posting as a guest is
+the escape hatch.
+
 ### Server-side enforcement (recommended)
 
 `functions/` holds a Cloud Function (`submitScore`) that re-validates every
