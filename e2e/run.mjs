@@ -444,6 +444,89 @@ console.log('suite: crt')
   await page.close()
 }
 
+// ---- Suite 7: play events reach the embedding page ----
+console.log('suite: tracking')
+{
+  // A synthetic host page that embeds the game and collects its messages —
+  // the only way to exercise the postMessage path, which no-ops when the
+  // game is not in an iframe.
+  const page = await browser.newPage()
+  await page.route(`http://localhost:${PORT}/__host`, (r) =>
+    r.fulfill({
+      contentType: 'text/html',
+      body: `<!doctype html><meta charset="utf-8"><script>
+        window.__doggo = []
+        addEventListener('message', (e) => {
+          if (e.origin !== location.origin) return
+          if (e.data && e.data.source === 'doggo') window.__doggo.push(e.data)
+        })
+      </script><iframe src="/" style="width:420px;height:920px;border:0"></iframe>`,
+    }),
+  )
+  await page.route('https://dog.ceo/api/breeds/list/all', (r) =>
+    r.fulfill({
+      json: { message: { pug: [], husky: [], beagle: [], boxer: [] }, status: 'success' },
+    }),
+  )
+  await page.route(/https:\/\/dog\.ceo\/api\/breed\/(\w+)\/images\/random/, (r) => {
+    const breed = r
+      .request()
+      .url()
+      .match(/breed\/(\w+)\//)[1]
+    r.fulfill({ json: { message: `https://images.dog.ceo/${breed}.jpg`, status: 'success' } })
+  })
+  await page.route(/https:\/\/images\.dog\.ceo\/.*/, (r) =>
+    r.fulfill({ contentType: 'image/jpeg', body: JPEG }),
+  )
+  await page.goto(`http://localhost:${PORT}/__host`)
+
+  const game = page.frameLocator('iframe')
+  await game.locator('.mode-card').first().waitFor({ timeout: 8000 })
+  const drain = () => page.evaluate(() => window.__doggo)
+
+  ;(await drain()).some((e) => e.event === 'app_ready')
+    ? ok('app_ready reaches the host')
+    : fail('no app_ready: ' + JSON.stringify(await drain()))
+
+  await game.locator('.mode-card:has-text("Endless Streak")').click()
+  await game.locator('.answer').first().waitFor({ timeout: 8000 })
+  const started = (await drain()).find((e) => e.event === 'game_start')
+  started?.mode === 'streak'
+    ? ok('game_start carries the mode')
+    : fail('game_start: ' + JSON.stringify(started))
+
+  // Miss on purpose, then check the finished run is reported exactly once.
+  const right =
+    NAME[(await game.locator('.dog-card img').getAttribute('src')).match(/([a-z]+)\.jpg/)[1]]
+  const labels = await game.locator('.answer').allTextContents()
+  await game.locator(`.answer:has-text("${labels.find((l) => l !== right)}")`).click()
+  await game.locator('.gameover').waitFor({ timeout: 4000 })
+  await sleep(300)
+  const overs = (await drain()).filter((e) => e.event === 'game_over')
+  overs.length === 1 && overs[0].mode === 'streak' && overs[0].score === 0
+    ? ok('game_over reported once, with the score')
+    : fail('game_over events: ' + JSON.stringify(overs))
+
+  // Nothing identifying should ever be in the payload.
+  const leaky = (await drain()).filter((e) => 'name' in e || 'nickname' in e)
+  leaky.length === 0 ? ok('no names in the payload') : fail('leaked: ' + JSON.stringify(leaky))
+  await page.close()
+}
+{
+  // Standalone (not embedded), the game must not post to itself.
+  const page = await newGamePage()
+  const posted = await page.evaluate(() => {
+    const seen = []
+    addEventListener('message', (e) => e.data?.source === 'doggo' && seen.push(e.data))
+    document.querySelector('.mode-card').click()
+    return new Promise((r) => setTimeout(() => r(seen), 300))
+  })
+  posted.length === 0
+    ? ok('silent when not embedded')
+    : fail('posted to itself: ' + JSON.stringify(posted))
+  await page.close()
+}
+
 await browser.close()
 server.kill()
 if (failures) {

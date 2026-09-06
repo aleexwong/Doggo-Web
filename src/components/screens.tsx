@@ -11,6 +11,7 @@ import {
   NAME_MAX,
 } from '../game/leaderboard'
 import { Theme } from '../game/theme'
+import { track } from '../game/track'
 import { AppBar } from './PhoneFrame'
 import { DogSketch, PawMark, Wordmark } from './Logo'
 import { LeaderboardIcon, ThemeIcon } from './icons'
@@ -214,6 +215,13 @@ export function GameOverScreen({
       if (!overrideName) saveNickname(name)
       await submitScore(state.mode, name, state.score)
       setPost('done')
+      // The handle itself never leaves the game — only whether it was a guest.
+      track({
+        event: 'score_posted',
+        mode: state.mode,
+        score: state.score,
+        guest: overrideName !== undefined,
+      })
     } catch {
       setPost('error')
     }
@@ -250,6 +258,7 @@ export function GameOverScreen({
         setCopied(true)
         setTimeout(() => setCopied(false), 1500)
       }
+      track({ event: 'score_shared', mode: state.mode, score: result })
     } catch {
       /* user cancelled or clipboard blocked */
     }

@@ -249,6 +249,67 @@ the leaderboard section above.
 [MIT](LICENSE). Dog photos come from [Dog.CEO](https://dog.ceo/dog-api/) and
 carry their own terms.
 
+## Tracking play from your site
+
+The game runs in an iframe, so your site's analytics cannot see inside it — a
+page view tells you someone loaded the page, not whether anyone played. So the
+game posts anonymous play events to `window.parent` and you forward them
+wherever you already send events. No third-party script ships in the game, and
+you choose what is worth recording.
+
+| Event | Payload |
+| --- | --- |
+| `app_ready` | — |
+| `game_start` | `mode` |
+| `game_over` | `mode`, `score`, `personalBest` |
+| `score_posted` | `mode`, `score`, `guest` |
+| `leaderboard_open` | — |
+| `score_shared` | `mode`, `score` |
+
+Every message carries `source: 'doggo'`. Nothing identifying is ever sent — no
+player name, no leaderboard handle, no ids; `score_posted` reports only
+*whether* the post was a guest.
+
+```tsx
+'use client'
+import { useEffect } from 'react'
+
+const GAME_ORIGIN = 'https://<deployed-url>'
+
+export function DoggoEmbed() {
+  useEffect(() => {
+    function onMessage(e: MessageEvent) {
+      // Any page can post to any window, so an unchecked listener trusts
+      // anyone. Verify the origin before you look at the payload.
+      if (e.origin !== GAME_ORIGIN) return
+      if (e.data?.source !== 'doggo') return
+
+      const { event, ...props } = e.data
+      // Forward to whatever you already run, e.g.
+      //   track(event, props)                    // @vercel/analytics
+      //   plausible(event, { props })
+      //   gtag('event', event, props)
+    }
+    window.addEventListener('message', onMessage)
+    return () => window.removeEventListener('message', onMessage)
+  }, [])
+
+  return (
+    <iframe
+      src={GAME_ORIGIN}
+      title="Doggo dog breed guessing game"
+      loading="lazy"
+      allow="clipboard-write"
+      style={{ width: '100%', maxWidth: 760, height: 900, border: 0 }}
+    />
+  )
+}
+```
+
+Events go to `*` by default, which reaches whoever embedded the game — fine for
+anonymous counters. Set `VITE_TRACK_ORIGIN` to your site's origin to narrow it.
+Outside an iframe the game posts nothing at all.
+
 ## Embed (Next.js site)
 
 The CRT is the default, and suits a block with room around it:

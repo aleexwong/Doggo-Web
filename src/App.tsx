@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useReducer, useState } from 'react'
+import { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 import { LeaderboardScreen } from './components/Leaderboard'
 import { PhoneFrame } from './components/PhoneFrame'
 import { WebFrame } from './components/WebFrame'
@@ -14,6 +14,7 @@ import {
 import { initialState, reducer, Mode } from './game/state'
 import { useTheme } from './game/theme'
 import { framePrefersDark, initialFrame } from './game/layout'
+import { track } from './game/track'
 import { Breed, fetchBreeds } from './game/api'
 import { buildRound } from './game/rounds'
 
@@ -32,7 +33,36 @@ export default function App() {
     fetchBreeds().then(setBreeds)
   }, [])
 
-  const start = useCallback((mode: Mode) => dispatch({ type: 'START', mode }), [])
+  // Anonymous play events for the embedding page. See src/game/track.ts.
+  useEffect(() => track({ event: 'app_ready' }), [])
+
+  const start = useCallback((mode: Mode) => {
+    track({ event: 'game_start', mode })
+    dispatch({ type: 'START', mode })
+  }, [])
+
+  const openBoard = useCallback(() => {
+    track({ event: 'leaderboard_open' })
+    setShowBoard(true)
+  }, [])
+
+  // Report a finished run once. The ref survives StrictMode's double effect,
+  // which would otherwise report every game over twice in development.
+  const reportedGameOver = useRef(false)
+  useEffect(() => {
+    if (state.phase !== 'gameover') {
+      reportedGameOver.current = false
+      return
+    }
+    if (reportedGameOver.current) return
+    reportedGameOver.current = true
+    track({
+      event: 'game_over',
+      mode: state.mode,
+      score: state.score,
+      personalBest: state.score > 0 && state.score > state.prevBest,
+    })
+  }, [state.phase, state.mode, state.score, state.prevBest])
 
   // Fill the current round whenever we're loading: fresh start, breeds
   // arriving after start, or advancing past a round that wasn't prefetched.
@@ -90,7 +120,7 @@ export default function App() {
               theme={theme}
               onToggleTheme={toggleTheme}
               onStart={start}
-              onBoard={() => setShowBoard(true)}
+              onBoard={openBoard}
             />
           )}
           {state.phase === 'loading' && <LoadingScreen />}
@@ -106,7 +136,7 @@ export default function App() {
               state={state}
               onPlayAgain={() => start(state.mode)}
               onHome={() => dispatch({ type: 'HOME' })}
-              onBoard={() => setShowBoard(true)}
+              onBoard={openBoard}
             />
           )}
           {state.phase === 'error' && (
