@@ -153,6 +153,11 @@ test('the blitz ends and banks the score when the deadline passes', () => {
   assert.equal(s.bestBlitz, 17)
 })
 
+test('a tick within the same second returns the same state, so nothing re-renders', () => {
+  const s = at({ mode: 'blitz', timeLeft: 13, deadline: Date.now() + 12_600 })
+  assert.equal(reducer(s, { type: 'TICK' }), s)
+})
+
 test('ticks do nothing in streak mode or once the run is over', () => {
   const streak = at({ mode: 'streak', deadline: null })
   assert.equal(reducer(streak, { type: 'TICK' }), streak)
