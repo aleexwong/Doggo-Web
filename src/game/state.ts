@@ -159,6 +159,9 @@ export function reducer(s: GameState, a: Action): GameState {
         saveBests(next)
         return next
       }
+      // Ticks run four times a second; returning the same object when the
+      // displayed second hasn't changed lets React skip the re-render.
+      if (timeLeft === s.timeLeft) return s
       return { ...s, timeLeft }
     }
     case 'FAIL':
